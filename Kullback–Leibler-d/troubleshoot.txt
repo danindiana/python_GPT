@@ -1,0 +1,270 @@
+This Python program performs the following steps:
+
+1. Import necessary libraries:
+   - `numpy` as `np`: A library for numerical computations.
+   - `Counter` from `collections`: A utility to count occurrences of elements in a collection.
+   - `os`: A module for interacting with the operating system.
+   - `PyPDF2`: A library for working with PDF files.
+
+2. Define a function `kl_divergence(p, q, eps=1e-10)`:
+   - This function calculates the Kullback-Leibler divergence between two probability distributions `p` and `q`. It uses numpy to perform element-wise operations on the distributions and returns the calculated divergence.
+
+3. Define a function `normalize(counter)`:
+   - This function takes a counter (a collection of elements and their occurrences) and calculates normalized probabilities for each element based on their occurrence frequencies. It returns a dictionary with normalized probabilities.
+
+4. Define a function `preprocess_text(text)`:
+   - This function takes a text input, converts it to lowercase, creates a character counter using the `Counter` function, and then normalizes the character frequencies using the `normalize` function.
+
+5. Define a function `preprocess_pdf(file_path)`:
+   - This function takes a PDF file path, extracts text from the PDF using PyPDF2, and preprocesses the extracted text using the `preprocess_text` function.
+
+6. Define a function `get_files(directory)`:
+   - This function takes a directory path, lists the files in the directory, and filters out files with `.txt` or `.pdf` extensions. It returns a list of filenames with those extensions.
+
+7. Define a function `select_files(directory, files)`:
+   - This function takes a directory path and a list of filenames, and it prompts the user to select files for comparison by displaying a numbered list of available files. The user enters the numbers of the files they want to compare, separated by commas. The function returns a list of selected file paths.
+
+8. Define the main function `main()`:
+   - The main function:
+     - Asks the user for a directory path.
+     - Gets a list of files in the directory using `get_files`.
+     - Prompts the user to select files for comparison using `select_files`.
+     - Processes the selected files:
+       - If a file is `.txt`, it reads the text, preprocesses it, and stores the distribution.
+       - If a file is `.pdf`, it extracts the text, preprocesses it, and stores the distribution.
+     - Initializes a matrix to store the calculated Kullback-Leibler divergences between the distributions of the selected files.
+     - Calculates the divergences between each pair of distributions using the `kl_divergence` function and stores them in the divergence matrix.
+     - Prints the calculated divergences between pairs of files.
+
+9. Finally, the script runs the `main()` function if the script is executed directly (not imported as a module).
+
+The overall purpose of this program is to compare the similarity between the character distributions of selected text and PDF files using Kullback-Leibler divergence, a measure of how one probability distribution differs from another. It allows the user to analyze and quantify the textual similarity between different files in the specified directory.
+
+import numpy as np
+from collections import Counter
+import os
+import PyPDF2
+
+def kl_divergence(p, q, eps=1e-10):
+    p = np.clip(p, eps, None)
+    q = np.clip(q, eps, None)
+    return np.sum(p * np.log(p / q))
+
+def normalize(counter):
+    total = sum(counter.values())
+    return {char: count/total for char, count in counter.items()}
+
+def preprocess_text(text):
+    text = text.lower()
+    counter = Counter(text)
+    return normalize(counter)
+
+def preprocess_pdf(file_path):
+    with open(file_path, 'rb') as f:
+        reader = PyPDF2.PdfReader(f)
+        text = ""
+        for page in reader.pages:
+            text += page.extract_text()
+    return preprocess_text(text)
+
+def get_files(directory):
+    files = os.listdir(directory)
+    return [file for file in files if file.endswith('.txt') or file.endswith('.pdf')]
+
+def select_files(directory, files):
+    print("Please select files to compare:")
+    for i, file in enumerate(files):
+        print(f"{i+1}: {file}")
+    indices = input("Enter the numbers of the files (separated by commas): ")
+    indices = [int(index.strip()) - 1 for index in indices.split(',')]
+    selected_files = [files[index] for index in indices]
+    return [os.path.join(directory, file) for file in selected_files]
+
+def main():
+    directory = input("Enter the directory to scan for files: ")
+
+    files = get_files(directory)
+    print(f"Found {len(files)} files in {directory}.")
+
+    selected_files = select_files(directory, files)
+
+    distributions = []
+    for file in selected_files:
+        if file.endswith('.txt'):
+            with open(file, 'r', encoding='utf-8-sig') as f:
+                text = f.read()
+            dist = preprocess_text(text)
+        elif file.endswith('.pdf'):
+            dist = preprocess_pdf(file)
+        distributions.append(dist)
+
+    num_files = len(selected_files)
+    divergence_matrix = np.zeros((num_files, num_files))
+
+    for i in range(num_files):
+        for j in range(i, num_files):
+            dist1 = distributions[i]
+            dist2 = distributions[j]
+
+            # Fill zero values for unseen characters in each distribution
+            for key in (dist1.keys() - dist2.keys()):
+                dist2[key] = 0
+            for key in (dist2.keys() - dist1.keys()):
+                dist1[key] = 0
+
+            # Convert the distributions into numpy arrays
+            p = np.array(list(dist1.values()))
+            q = np.array(list(dist2.values()))
+
+            divergence_pq = kl_divergence(p, q)
+            divergence_qp = kl_divergence(q, p)
+
+            divergence_matrix[i, j] = divergence_pq
+            divergence_matrix[j, i] = divergence_qp
+
+    for i in range(num_files):
+        for j in range(i+1, num_files):
+            file1 = selected_files[i]
+            file2 = selected_files[j]
+            divergence_pq = divergence_matrix[i, j]
+            divergence_qp = divergence_matrix[j, i]
+            print(f"Kullback-Leibler divergence from {file1} to {file2}: {divergence_pq}")
+            print(f"Kullback-Leibler divergence from {file2} to {file1}: {divergence_qp}")
+
+if __name__ == "__main__":
+    main()
+
+Running that code throws these errors:
+
+Traceback (most recent call last):
+  File "C:\Users\walter\AppData\Roaming\Python\Python37\site-packages\numpy\__init__.py", line 127, in <module>
+    from numpy.__config__ import show as show_config
+ModuleNotFoundError: No module named 'numpy.__config__'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ".\bulk_similarity_ranking.py", line 1, in <module>
+    import numpy as np
+  File "C:\Users\walter\AppData\Roaming\Python\Python37\site-packages\numpy\__init__.py", line 132, in <module>
+    raise ImportError(msg) from e
+ImportError: Error importing numpy: you should not try to import numpy from
+        its source directory; please exit the numpy source tree, and relaunch
+        your python interpreter from there.
+
+
+The error message you're encountering suggests that you're trying to import the `numpy` library from within its source directory, which is causing the ImportError. To resolve this issue, you need to ensure that you're not running the script from within the `numpy` source directory.
+
+Here's what you can do to fix the issue:
+
+1. Make sure you're running the script from a different directory, not from the `numpy` source directory.
+
+2. If you've navigated to the directory containing the script in your command prompt or terminal, you should be able to execute the script without any problems. You can navigate to the directory containing your script using the `cd` command in the terminal.
+
+3. If you're using an integrated development environment (IDE) to run the script, make sure the working directory for the IDE is set to the directory containing the script and not the `numpy` source directory.
+
+If you're still encountering issues, double-check that your `numpy` installation is correct. You can do this by running the following command in your terminal:
+
+```
+pip show numpy
+```
+
+This will display information about your `numpy` installation, including its location. Make sure that the installation path is correct and that you're not inadvertently using the `numpy` source directory. If needed, you can reinstall `numpy` using the following command:
+
+```
+pip install --upgrade --force-reinstall numpy
+```
+
+Remember to execute these commands outside of the `numpy` source directory to avoid the ImportError.
+
+pip show numpy
+ERROR: Exception:
+Traceback (most recent call last):
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 3108, in _dep_map
+    return self.__dep_map
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 2901, in __getattr__
+    raise AttributeError(attr)
+AttributeError: _DistInfoDistribution__dep_map
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 3099, in _parsed_pkg_info
+    return self._pkg_info
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 2901, in __getattr__
+    raise AttributeError(attr)
+AttributeError: _pkg_info
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_internal\cli\base_command.py", line 169, in exc_logging_wrapper
+    status = run_func(*args)
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_internal\commands\show.py", line 46, in run
+    results, list_files=options.files, verbose=options.verbose
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_internal\commands\show.py", line 150, in print_results
+    for i, dist in enumerate(distributions):
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_internal\commands\show.py", line 104, in search_packages_info
+    required_by = sorted(_get_requiring_packages(dist), key=str.lower)
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_internal\commands\show.py", line 94, in <genexpr>
+    in {canonicalize_name(d.name) for d in dist.iter_dependencies()}
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_internal\metadata\pkg_resources.py", line 216, in iter_dependencies
+    return self._dist.requires(extras)
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 2821, in requires
+    dm = self._dep_map
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 3110, in _dep_map
+    self.__dep_map = self._compute_dependencies()
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 3119, in _compute_dependencies
+    for req in self._parsed_pkg_info.get_all('Requires-Dist') or []:
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 3101, in _parsed_pkg_info
+    metadata = self.get_metadata(self.PKG_INFO)
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 1517, in get_metadata
+    value = self._get(path)
+  File "c:\program files (x86)\microsoft visual studio\shared\python37_64\lib\site-packages\pip\_vendor\pkg_resources\__init__.py", line 1726, in _get
+    with open(path, 'rb') as stream:
+FileNotFoundError: [Errno 2] No such file or directory: 'c:\\users\\walter\\appdata\\roaming\\python\\python37\\site-packages\\typing_extensions-4.7.1.dist-info\\METADATA'
+
+
+The error messages you provided indicate that there might be an issue with your Python environment, specifically related to the packaging and dependency management. The errors seem to be occurring during the process of displaying information about the installed packages using `pip show`.
+
+Here are a few steps you can try to resolve this issue:
+
+1. **Check Python Environment:** Make sure you're using the correct Python environment where `numpy` is installed. If you have multiple Python installations or virtual environments, ensure that you're using the right one.
+
+2. **Update pip:** Try updating your `pip` to the latest version by running the following command in your terminal or command prompt:
+
+   ```
+   python -m pip install --upgrade pip
+   ```
+
+3. **Check Installed Packages:** Verify that the `numpy` package is correctly installed. You can do this by listing the installed packages:
+
+   ```
+   pip list
+   ```
+
+   Make sure `numpy` is listed. If not, you can install it using:
+
+   ```
+   pip install numpy
+   ```
+
+4. **Check PATH:** Make sure that your Python installation's `Scripts` directory is included in your system's `PATH` environment variable. This ensures that when you run `pip` commands, the correct version of `pip` is used.
+
+5. **Clear PIP Cache:** Sometimes, cached files might cause issues. You can clear the pip cache by running:
+
+   ```
+   pip cache purge
+   ```
+
+6. **Repair Package Indexes:** It's possible that the package indexes used by pip are corrupted. You can repair them by running:
+
+   ```
+   pip install --upgrade --force-reinstall setuptools
+   ```
+
+7. **Virtual Environments:** If you're using a virtual environment, try creating a new one and installing the necessary packages from scratch.
+
+8. **Python Environment:** If none of the above steps work, consider creating a fresh Python environment and reinstalling your required packages.
+
+If you're still facing issues after trying these steps, it might be beneficial to seek assistance from a technical forum or community where you can provide detailed information about your environment and the specific steps you've taken.
