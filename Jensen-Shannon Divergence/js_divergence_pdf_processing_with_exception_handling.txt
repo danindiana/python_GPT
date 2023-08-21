@@ -1,0 +1,37 @@
+Certainly! Let's name the last code file "js_divergence_pdf_processing_with_exception_handling.py".
+
+Here's how the code works step by step:
+
+1. **Import Libraries**: The required libraries are imported, including `os`, `numpy`, `scipy`, and `fitz` (PyMuPDF for PDF processing).
+
+2. **Find PDF Files**: The `find_pdf_files` function recursively scans a specified directory to find all PDF files and returns a list of their paths.
+
+3. **Preprocess Text**: The `preprocess_text` function takes a text and a target length as input and pads or truncates the text to the target length.
+
+4. **Calculate Jensen-Shannon Divergence**: The `calculate_js_divergence` function calculates the Jensen-Shannon Divergence between two probability distributions `p` and `q`.
+
+5. **Parse Selection**: The `parse_selection` function takes user input for file selection and parses it into a list of selected indices.
+
+6. **Extract Text from PDF**: The `extract_text_from_pdf` function attempts to extract text from a given PDF file. If an error occurs during extraction, an exception is caught and an error message is displayed.
+
+7. **Convert Windows Path to WSL Path**: The `convert_windows_path_to_wsl_path` function converts a Windows-style path to a WSL-compatible path.
+
+8. **Main Function**: The `main` function is the entry point of the script. It prompts the user to input the root directory to start scanning for PDF files and the target text length for preprocessing.
+
+9. **Find PDF Files**: It uses the `find_pdf_files` function to find PDF files in the specified directory.
+
+10. **Select Files**: It prompts the user to select files by entering numbers/ranges and uses the `parse_selection` function to create a list of selected indices.
+
+11. **Extract Text and Preprocess**: For each selected index, the script attempts to extract text from the corresponding PDF file using the `extract_text_from_pdf` function. If successful, it preprocesses the extracted text using the `preprocess_text` function.
+
+12. **Calculate Jensen-Shannon Divergence**: The script calculates the Jensen-Shannon Divergence between the preprocessed text of the first file and each of the subsequent files.
+
+13. **Display Results**: The script displays the selected files, their extracted and preprocessed text, and the calculated Jensen-Shannon Divergence values.
+
+14. **Sort and Display Results**: If the user chooses to sort the results, the script sorts the calculated Jensen-Shannon Divergence values in descending order and displays them along with the corresponding filenames.
+
+15. **Repeat or Exit**: After displaying the results, the script asks the user if they want to go again. If the user chooses to repeat, the `main` function is called again; otherwise, the script exits.
+
+16. **Entry Point**: The script checks if it's being run directly (not imported as a module) and if so, it calls the `main` function to start the process.
+
+This script provides a user-friendly way to calculate and analyze Jensen-Shannon Divergence between text extracted from selected PDF files. It also includes exception handling to address potential errors during PDF processing and ensures a smoother user experience.
