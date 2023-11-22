@@ -6,8 +6,8 @@ from sklearn.decomposition import NMF
 import pandas as pd
 
 # Source and target directories
-source_directory = "/media/walter/7514e32b-65c9-4a64-a233-5db2311455f4/tar_text2/" #Source Directory
-target_directory = "/media/walter/7514e32b-65c9-4a64-a233-5db2311455f4/topic_extracts/" #Target Directory
+source_directory = "/your-source-dir/" #Source Directory
+target_directory = "/your-target-dir/" #Target Directory
 
 # Create the target directory if it doesn't exist
 if not os.path.exists(target_directory):
