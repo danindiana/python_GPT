@@ -90,9 +90,47 @@ Certainly! Here's a list of suggested improvements to enhance the script with mo
    - **Distributed Processing**: Explore options for distributed processing to handle very large datasets across multiple machines or nodes.
    - **Resource Management**: Implement better resource management to avoid overloading the system, possibly using techniques like rate limiting or backpressure.
 
-8. **Testing and Validation**:
+8. **Testing and Validation**:7
    - **Unit Tests**: Write unit tests for individual functions to ensure they behave as expected.
    - **Integration Tests**: Conduct integration tests to verify that the script works correctly with real data and external dependencies.
    - **Performance Tests**: Regularly run performance tests to ensure the script scales well with increasing data sizes.
 
 By incorporating these improvements, the script can become more robust, efficient, and user-friendly, making it easier to manage and troubleshoot in various scenarios.
+
+
+
+To run the last output script, you will need to install the following libraries using `pip`:
+
+1. **pdfplumber**: For reading PDF files.
+2. **scikit-learn**: For TF-IDF vectorization and NMF topic modeling.
+3. **pandas**: For data manipulation (though it's not explicitly used in the provided script, it's a common library for data processing).
+4. **tqdm**: For progress bars.
+5. **joblib**: For parallel processing.
+
+You can install these libraries using the following `pip` commands:
+
+```sh
+pip install pdfplumber
+pip install scikit-learn
+pip install pandas
+pip install tqdm
+pip install joblib
+```
+
+If you are using a `requirements.txt` file, you can include the following lines:
+
+```
+pdfplumber
+scikit-learn
+pandas
+tqdm
+joblib
+```
+
+Then run:
+
+```sh
+pip install -r requirements.txt
+```
+
+This will ensure that all the necessary libraries are installed for the script to run correctly.
