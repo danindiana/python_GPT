@@ -1,3 +1,6 @@
+Yup. It's another attempt to calc novelty from text files. It works but it's a kludge.
+
+
 This code is a Python script designed to process large datasets of URLs, compute their TF-IDF (Term Frequency-Inverse Document Frequency) vectors, and then calculate the cosine similarity between these vectors in parallel. The script also includes mechanisms for graceful shutdown, memory monitoring, and user interaction. Below is a step-by-step explanation of the code:
 
 ### 1. **Importing Libraries**
@@ -278,3 +281,191 @@ This script is designed to handle large datasets of URLs by:
 - Computing TF-IDF vectors for the URLs.
 - Calculating cosine similarity in parallel chunks to handle large datasets efficiently.
 - Monitoring memory usage and ensuring a graceful shutdown on system signals.
+
+
+
+
+
+
+
+
+npz_loader_with_escape.py
+
+This program is designed to process and analyze large datasets of URLs and their corresponding cosine similarity matrices stored in `.npz` files. The program allows the user to select specific files for processing, loads the data lazily to handle large datasets efficiently, and calculates novelty scores based on the similarity matrices. Finally, it saves the results to a CSV file. Below is a step-by-step explanation of how the program works:
+
+### 1. **Importing Libraries**
+   ```python
+   import os
+   import numpy as np
+   import pandas as pd
+   import scipy.sparse as sp
+   import logging
+   ```
+   - **os**: For interacting with the file system.
+   - **numpy**: For numerical operations.
+   - **pandas**: For data manipulation and CSV writing.
+   - **scipy.sparse**: For handling sparse matrices.
+   - **logging**: For logging information and errors.
+
+### 2. **Setting Up Logging**
+   ```python
+   logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+   ```
+   - Configures the logging module to output logs at the `INFO` level with a specific format.
+
+### 3. **Scanning for Files**
+   ```python
+   def scan_for_files(directory, file_extension):
+       files = []
+       for root, dirs, filenames in os.walk(directory):
+           for filename in filenames:
+               if filename.endswith(file_extension):
+                   files.append(os.path.join(root, filename))
+       return files
+   ```
+   - **scan_for_files**: Recursively scans a directory and its subdirectories for files with a specific extension (e.g., `.npz` or `.txt`).
+
+### 4. **Parsing Flexible Ranges**
+   ```python
+   def parse_selection(selection):
+       indices = []
+       parts = selection.split(',')
+       for part in parts:
+           if '-' in part:
+               start, end = part.split('-')
+               indices.extend(range(int(start), int(end) + 1))
+           else:
+               indices.append(int(part))
+       return indices
+   ```
+   - **parse_selection**: Parses a string of flexible ranges (e.g., "1,2,4-8,11") into a list of indices.
+
+### 5. **Selecting Files**
+   ```python
+   def select_files(files, file_type):
+       print(f"\n{file_type} files found:")
+       for idx, file in enumerate(files):
+           print(f"{idx + 1}. {file}")
+       
+       selected_indices = input(f"Enter the numbers of the {file_type} files you want to use (e.g., 1,2,4-8,11): ").strip()
+       parsed_indices = parse_selection(selected_indices)
+       selected_files = [files[i - 1] for i in parsed_indices if i <= len(files)]
+       return selected_files
+   ```
+   - **select_files**: Lists files of a specific type and allows the user to select which ones to use by entering a flexible range of indices.
+
+### 6. **Lazy Loading of URLs**
+   ```python
+   def load_urls_lazily(files):
+       for file_path in files:
+           with open(file_path, 'r') as file:
+               for line in file:
+                   yield line.strip()
+   ```
+   - **load_urls_lazily**: Lazily loads URLs from selected text files, yielding one URL at a time to handle large datasets efficiently.
+
+### 7. **Validating Sparse Matrices**
+   ```python
+   def is_valid_sparse_matrix(file_path):
+       try:
+           matrix = sp.load_npz(file_path)
+           return sp.issparse(matrix)
+       except Exception as e:
+           logging.warning(f"File {file_path} is not a valid sparse matrix: {str(e)}")
+           return False
+   ```
+   - **is_valid_sparse_matrix**: Checks if a `.npz` file contains a valid sparse matrix.
+
+### 8. **Lazy Loading of Sparse Matrices**
+   ```python
+   def load_sparse_matrices_lazily(files):
+       for file_path in files:
+           if is_valid_sparse_matrix(file_path):
+               sparse_matrix = sp.load_npz(file_path)
+               logging.info(f"Loaded {file_path} with shape {sparse_matrix.shape}")
+               yield sparse_matrix
+           else:
+               logging.warning(f"Skipping invalid sparse matrix file: {file_path}")
+   ```
+   - **load_sparse_matrices_lazily**: Lazily loads valid sparse matrices from selected `.npz` files, yielding one matrix at a time.
+
+### 9. **Calculating Novelty Scores**
+   ```python
+   def calculate_novelty_scores_lazily(matrix_chunks):
+       for chunk in matrix_chunks:
+           mean_similarity = chunk.mean(axis=1)
+           novelty_scores = 1 - mean_similarity.A1
+           yield novelty_scores
+   ```
+   - **calculate_novelty_scores_lazily**: Calculates novelty scores for each chunk of similarity matrices. Novelty score is defined as `1 - mean_similarity`.
+
+### 10. **Main Logic**
+   ```python
+   if __name__ == "__main__":
+       base_directory = '/home/jeb/programs/rust_progs/hydra_3'
+
+       npz_files = scan_for_files(base_directory, '.npz')
+       if not npz_files:
+           logging.error("No .npz files found.")
+           exit()
+       selected_npz_files = select_files(npz_files, "Cosine Similarity (.npz)")
+
+       url_files = scan_for_files(base_directory, '.txt')
+       if not url_files:
+           logging.error("No URL files found.")
+           exit()
+       selected_url_files = select_files(url_files, "URL")
+
+       url_generator = load_urls_lazily(selected_url_files)
+       matrix_generator = load_sparse_matrices_lazily(selected_npz_files)
+
+       novelty_data = []
+       url_count = 0
+
+       try:
+           for matrix_chunk in matrix_generator:
+               urls_in_chunk = [next(url_generator) for _ in range(matrix_chunk.shape[0])]
+               novelty_scores_chunk = next(calculate_novelty_scores_lazily([matrix_chunk]))
+               
+               for url, score in zip(urls_in_chunk, novelty_scores_chunk):
+                   novelty_data.append({'url': url, 'novelty_score': score})
+                   url_count += 1
+               
+               logging.info(f"Processed {url_count} URLs so far.")
+               
+       except StopIteration:
+           logging.info("All URLs and matrix chunks have been processed.")
+
+       novelty_df = pd.DataFrame(novelty_data)
+       novelty_df_sorted = novelty_df.sort_values(by='novelty_score', ascending=False)
+
+       output_file = "sorted_novelty_scores.csv"
+       chunk_size = 10000
+
+       logging.info(f"Writing novelty scores to {output_file} in chunks of {chunk_size}...")
+
+       try:
+           with open(output_file, 'w') as f:
+               for i in range(0, len(novelty_df_sorted), chunk_size):
+                   novelty_df_sorted[i:i + chunk_size].to_csv(f, index=False, header=(i == 0), escapechar='\\')
+                   logging.info(f"Wrote rows {i} to {i + chunk_size}")
+       except Exception as e:
+           logging.error(f"Error while writing CSV: {str(e)}")
+       
+       logging.info("Novelty scoring completed and saved to sorted_novelty_scores.csv")
+   ```
+   - **Main Logic**:
+     1. **Scanning for Files**: Scans the base directory for `.npz` and `.txt` files.
+     2. **Selecting Files**: Allows the user to select which `.npz` and `.txt` files to process.
+     3. **Lazy Loading**: Lazily loads URLs and sparse matrices.
+     4. **Processing Chunks**: Processes each chunk of similarity matrix and corresponding URLs to calculate novelty scores.
+     5. **Saving Results**: Saves the novelty scores to a CSV file in chunks to handle large datasets efficiently.
+
+### Summary
+This program is designed to handle large datasets of URLs and their corresponding cosine similarity matrices by:
+- Allowing the user to select specific files for processing.
+- Loading the data lazily to handle large datasets efficiently.
+- Calculating novelty scores based on the similarity matrices.
+- Saving the results to a CSV file in chunks to handle large outputs efficiently.
+
+The program is structured to be memory-efficient and scalable, making it suitable for processing large datasets.
