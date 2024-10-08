@@ -35,6 +35,18 @@ graph TD
 
     Y -->|Final TF-IDF Matrix| Z[Transfer to CPU]
 ```
+### Explanation:
+
+- **Initialize Contexts for Both GPUs:** Set the context for each GPU using `cp.cuda.Device`.
+- **Monitor Memory Usage:** Track GPU memory usage using `cupy.cuda.mempool.get_default_pool().used_bytes()` and `nvidia-smi`.
+- **Adaptive Batching:** Dynamically adjust batch sizes based on available memory to ensure optimal performance.
+- **Efficient Data Transfer:** Minimize data transfer overhead by keeping data on the GPU and transferring only necessary data back to the CPU.
+- **Multi-GPU Processing:** Distribute the workload across multiple GPUs by splitting the dataset and processing different portions on each GPU.
+- **Memory Management:** Continuously monitor memory usage to avoid overflows and adjust batch sizes to ensure optimal performance.
+- **Performance Profiling:** Profile the code to identify bottlenecks and optimize performance.
+- **Error Handling:** Implement robust error handling to manage potential memory errors and ensure stability.
+
+This Mermaid diagram visually represents the best practices for managing GPU memory with CuPy, ensuring efficient and stable processing of large datasets.
 
 
 Absolutely! Let's integrate system and GPU RAM constrained awareness into the workflow. This involves monitoring memory usage, dynamically adjusting batch sizes, and ensuring that data is transferred efficiently between CPU and GPU. Here's how you can achieve this:
