@@ -1,4 +1,40 @@
 ```mermaid
+graph LR
+    subgraph "CPU"
+        A[Document Stream] --> B(TfidfVectorizer)
+        B --> C{SciPy Sparse Matrix}
+    end
+    
+    subgraph "GPU (RTX 3080)"
+        C --> D[/cupyx.scipy.sparse.csr_matrix/]
+        D --> E(CuPy Sparse Matrix)
+        E --> F(Similarity Calculations)
+        E --> G(Dimensionality Reduction)
+    end
+    
+    F --> H(Results)
+    G --> H
+    
+    style C fill:#f9f,stroke:#333,stroke-width:2px
+    style D fill:#ccf,stroke:#333,stroke-width:2px
+    style E fill:#ccf,stroke:#333,stroke-width:2px
+```
+Explanation:
+
+Nodes: Each box (A, B, C, etc.) represents a step or data structure in the process.
+Edges: Arrows indicate the flow of data or execution.
+Subgraphs: The "CPU" and "GPU" subgraphs visually separate the operations happening on each processor.
+Styling: I've highlighted the SciPy and CuPy sparse matrices with colors to emphasize the conversion step.
+Interpretation:
+
+The document stream (A) is fed into the TfidfVectorizer (B) on the CPU.
+The TfidfVectorizer produces a SciPy sparse matrix (C) in CPU memory.
+This SciPy matrix is converted to a CuPy sparse matrix (E) using cupyx.scipy.sparse.csr_matrix (D), transferring the data to the GPU.
+On the GPU, operations like similarity calculations (F) and dimensionality reduction (G) are performed using the CuPy sparse matrix.
+The results (H) are obtained.
+This diagram provides a clear visual representation of the data flow and processing steps involved in your RAM-constrained streaming TF-IDF pipeline with CuPy.
+
+```mermaid
 graph TD
     A[Initialize Contexts for Both GPUs] -->|cp.cuda.Device| B[Set Context for Each GPU]
 
