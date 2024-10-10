@@ -1,3 +1,9 @@
+Tested on: 
+lspci -nn | grep -i nvidia
+0d:00.0 VGA compatible controller [0300]: NVIDIA Corporation GA102 [GeForce RTX 3080] [10de:2206] (rev a1)
+0e:00.0 VGA compatible controller [0300]: NVIDIA Corporation GA104 [GeForce RTX 3060] [10de:2487] (rev a1)
+
+
 CuPy is a powerful open-source library that brings the capabilities of NumPy to NVIDIA GPUs and AMD ROCm platforms.  Essentially, it allows you to run your NumPy code on a GPU, often resulting in significant speedups, especially for large arrays and complex computations.
 
 Here's a breakdown of what makes CuPy special:
