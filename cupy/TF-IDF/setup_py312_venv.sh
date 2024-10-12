@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default Python version and virtual environment directory
-DEFAULT_PYTHON_VERSION="3.12.7"
+DEFAULT_PYTHON_VERSION="3.12"
 DEFAULT_VENV_DIR="venv"
 
 # Parse command-line arguments for Python version and virtual environment directory
@@ -22,8 +22,17 @@ VENV_DIR=${VENV_DIR:-$DEFAULT_VENV_DIR}
 
 # Check if the specified Python version is installed
 if ! command -v python$PYTHON_VERSION &> /dev/null; then
-    echo "Python $PYTHON_VERSION is not installed."
-    exit 1
+    echo "Python $PYTHON_VERSION is not installed. Attempting to install..."
+
+    # Attempt to install Python (example for Ubuntu)
+    sudo apt-get update
+    sudo apt-get install -y python$PYTHON_VERSION
+
+    # Check if installation was successful
+    if ! command -v python$PYTHON_VERSION &> /dev/null; then
+        echo "Failed to install Python $PYTHON_VERSION."
+        exit 1
+    fi
 fi
 
 # Create a virtual environment
