@@ -1,3 +1,115 @@
+python --version
+Python 3.10.12
+
+*** USE pdf_validatorv9.py ***
+
+date
+Mon Oct 14 10:12:42 PM CDT 2024
+
+---
+
+# PDF Validator
+
+This Python program scans a directory for PDF files, validates them using PyMuPDF (fitz), and optionally deletes any invalid or corrupted files. The program also generates a text file listing the valid and invalid PDF files.
+
+## Table of Contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [How It Works](#how-it-works)
+- [Logging](#logging)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Features
+
+- **Directory Scanning**: Scans a specified directory for PDF files.
+- **PDF Validation**: Validates each PDF file using PyMuPDF.
+- **File Deletion**: Optionally deletes invalid or corrupted PDF files.
+- **Output File**: Generates a text file listing valid and invalid PDF files.
+- **Logging**: Uses the `logging` module for better error handling and information display.
+
+## Requirements
+
+- Python 3.10.12 or higher
+- PyMuPDF (fitz)
+
+## Installation
+
+1. **Clone the Repository**:
+   ```sh
+   git clone https://github.com/yourusername/pdf-validator.git
+   cd pdf-validator
+   ```
+
+2. **Install Dependencies**:
+   ```sh
+   pip install pymupdf
+   ```
+
+## Usage
+
+1. **Run the Program**:
+   ```sh
+   python pdf_validatorv9.py
+   ```
+
+2. **Enter the Target Directory**:
+   When prompted, enter the path to the directory containing the PDF files you want to validate.
+
+3. **Delete Invalid Files**:
+   Choose whether to delete invalid or corrupted PDF files by entering `Y` or `N` when prompted.
+
+4. **View Results**:
+   The program will display the list of valid and invalid PDF files and generate a `validated_files.txt` file with the same information.
+
+## How It Works
+
+### 1. Directory Scanning
+
+The program uses `pathlib.Path` to scan the specified directory for PDF files. It recursively searches for files with the `.pdf` extension.
+
+### 2. PDF Validation
+
+Each PDF file is validated using PyMuPDF (fitz). The `validate_pdf` function attempts to open the PDF file. If successful, the file is considered valid; otherwise, it is marked as invalid.
+
+### 3. File Deletion
+
+If the user chooses to delete invalid files, the program will attempt to delete each invalid PDF file. The `delete_files` function handles the deletion process and logs any errors encountered.
+
+### 4. Output File
+
+The program generates a `validated_files.txt` file listing all valid and invalid PDF files found during the scan.
+
+### 5. Logging
+
+The program uses the `logging` module to provide detailed information and error messages. Logs are displayed in the console and can be configured to write to a file if needed.
+
+## Logging
+
+The program uses the `logging` module to provide detailed information and error messages. Logs are displayed in the console and can be configured to write to a file if needed.
+
+### Log Levels
+
+- **INFO**: General information about the program's progress.
+- **WARNING**: Warnings about potential issues (e.g., file not found).
+- **ERROR**: Errors encountered during validation or deletion.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue if you find any bugs or have suggestions for improvements.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+This `README.md` provides a comprehensive guide to understanding and using the PDF Validator program. It covers installation, usage, how the program works, logging, and how to contribute to the project.
+
+
 Generate a program that uses python and any necessary libraries to scan a target directory and validate whether pdf files are valid or corrupted. Suggest a file name upon completion. 
 ChatGPT
 Sure, I can help you with that! To achieve this task, we can use the PyMuPDF library to check the validity of PDF files. You can install the library using the following command:
