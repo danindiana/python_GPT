@@ -1,3 +1,5 @@
+![duckchunker](https://github.com/user-attachments/assets/dd30f0b2-e3fe-40af-b7ab-26b1924e7aab)
+
 To address the ollama serve error indicating that "address already in use," you can adjust the IP and port configuration to resolve this conflict. Here’s how to proceed:
 
 Identify the Conflict: The error bind: address already in use suggests that another service is using port 11434 on 127.0.0.1. You can identify any processes currently bound to this port by running:
