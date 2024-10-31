@@ -56,22 +56,45 @@ graph TD
 ok give me just that using the ollama cli for bash.
 
 
-
+```markdown
 Bash
 ollama run <model_name> --max-tokens 5094 -i
 Use code with caution.
-
+```
 This command, when executed in your bash terminal, will:
 
+```markdown
 ollama run <model_name>: Start the Ollama model you specify (replace <model_name> with the actual name).
 --max-tokens 5094: Limit the model's output to a maximum of 5094 tokens.
 -i: Run the model in interactive mode, which allows you to have a conversation with it and receive streaming output.
+```
+
 Key Considerations:
 
-Streaming Behavior: The -i flag is crucial for getting streaming output. Ollama will send the model's response in chunks as it's generated, rather than waiting for the entire response to be complete.
-No Explicit stream=true: The Ollama CLI doesn't have a direct stream=true parameter like the API. The -i flag achieves the same effect for interactive use.
-Token Limit: The --max-tokens 5094 ensures that the model's response doesn't exceed the specified length.
-This concise command provides the core functionality you requested, directly within the Ollama CLI. 
+
+```markdown
+## Streaming Behavior
+
+The **-i** flag is crucial for getting streaming output. 🚀  
+*Ollama will send the model's response in chunks as it's generated, rather than waiting for the entire response to be complete.*
+
+## No Explicit `stream=true`
+
+The Ollama CLI doesn't have a direct `stream=true` parameter like the API. 🔗  
+*The **-i** flag achieves the same effect for interactive use.*
+
+## Token Limit
+
+The `--max-tokens 5094` ensures that the model's response doesn't exceed the specified length. ⏳  
+*This concise command provides the core functionality you requested, directly within the Ollama CLI.*
+```
+
+### Explanation:
+- **Streaming Behavior**: The `-i` flag is essential for real-time output.
+- **No Explicit `stream=true`**: Use the `-i` flag to mimic streaming behavior in the CLI.
+- **Token Limit**: Set a limit with `--max-tokens 5094` to control response length.
+
+This should make your document more visually appealing and easier to read!
 
 
 
