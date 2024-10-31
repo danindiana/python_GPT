@@ -1,3 +1,31 @@
+```mermaid
+graph TD
+    A[~/.bashrc or ~/.zshrc] -->|Contains| B{Aliases}
+    B --> C[ollama-start]
+    B --> D[ollama-stop]
+    B --> E[ollama-restart]
+    B --> F[ollama-status]
+
+    G[~/ollama-control.sh] -->|Contains| H[Script for interactive control]
+    
+    I[~/.desktop] --> J{Desktop Shortcut}
+    J --> K[OllamaControl.desktop]
+
+    subgraph Home Directory
+        A
+        G
+        I
+    end
+
+    subgraph Desktop
+        J
+    end
+    
+    style B fill:#ffdddd,stroke:#333,stroke-width:4px
+    style H fill:#ddffdd,stroke:#333,stroke-width:4px
+    style J fill:#ddddff,stroke:#333,stroke-width:4px
+```
+
 To create a flexible, user-friendly setup to control the `ollama` service, you can add a few shortcuts and scripts for convenience. Here’s a setup that will let you start, stop, restart, or check the status of the service easily.
 
 ### 1. **Alias Commands for Quick Service Control**
