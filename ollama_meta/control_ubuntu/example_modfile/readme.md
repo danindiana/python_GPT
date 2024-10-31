@@ -54,14 +54,13 @@ graph TD
 ```
 
 
-Certainly! Below is a cleaned-up version of your markdown file entry for clarity and correctness:
 
-```markdown
+
 # Q: What should I name that module file and does this look right?
 
+```markdown
 ## Example Modelfile
 
-```
 FROM nous-hermes2:10.7b-solar-q8_0
 
 SYSTEM You are a helpful and friendly AI assistant. Perform Analysis.
