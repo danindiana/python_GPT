@@ -1,3 +1,26 @@
+```mermaid
+graph TD
+    A[Start] --> B[Get Historical Data]
+    B --> C[Preprocess Data]
+    C --> D{Model Exists?}
+    D -- Yes --> E[Load Trained Model]
+    D -- No --> F[Train Model]
+    F --> G[Save Model]
+    G --> E
+    E --> H[Predict Future Prices]
+    H --> I[Evaluate Model Performance]
+    I --> J[Plot Actual vs Predicted Prices]
+    J --> K[Get Current Price]
+    K --> L[Risk Management]
+    L --> M{Predicted Price > Current Price?}
+    M -- Yes --> N[Place Stop-Loss and Take-Profit Orders]
+    M -- No --> O[Place Stop-Loss and Take-Profit Orders]
+    N --> P[Place Buy Order]
+    O --> Q[Place Sell Order]
+    P --> R[End]
+    Q --> R[End]
+```
+
 Thank you for the detailed suggestions! Below is an updated version of the trading algorithm with the improvements you mentioned, including type hints, input validation, logging, error handling, configuration management, and additional model evaluation metrics.
 
 ### Step 1: Set Up Your Environment
