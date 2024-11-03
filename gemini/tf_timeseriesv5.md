@@ -20,6 +20,42 @@ graph TD
     P --> R[End]
     Q --> R[End]
 ```
+Explanation:
+Start: The algorithm begins execution.
+
+Get Historical Data: Fetch historical BTC price data from the Gemini API.
+
+Preprocess Data: Handle missing values, outliers, and non-normal distributions.
+
+Model Exists?: Check if a trained model already exists.
+
+Yes: Load the trained model.
+
+No: Train the model and save it.
+
+Predict Future Prices: Use the trained model to predict future BTC prices.
+
+Evaluate Model Performance: Evaluate the model's performance using metrics such as MAE, MSE, RMSE, and MAPE.
+
+Plot Actual vs Predicted Prices: Visualize the model's performance by plotting actual vs predicted prices.
+
+Get Current Price: Fetch the current BTC price from the Gemini API.
+
+Risk Management: Implement stop-loss and take-profit orders.
+
+Predicted Price > Current Price?: Compare the predicted price with the current price.
+
+Yes: Place stop-loss and take-profit orders for a buy trade.
+
+No: Place stop-loss and take-profit orders for a sell trade.
+
+Place Buy Order: Execute a buy order if the predicted price is higher than the current price.
+
+Place Sell Order: Execute a sell order if the predicted price is lower than the current price.
+
+End: The algorithm completes execution.
+
+This diagram provides a visual representation of the trading algorithm's flow, making it easier to understand the sequence of operations and decision points.
 
 Thank you for the detailed suggestions! Below is an updated version of the trading algorithm with the improvements you mentioned, including type hints, input validation, logging, error handling, configuration management, and additional model evaluation metrics.
 
