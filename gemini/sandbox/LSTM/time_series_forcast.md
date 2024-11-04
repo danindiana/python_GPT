@@ -161,3 +161,18 @@ To enable the following instructions: AVX2 FMA, in other operations, rebuild Ten
 Num GPUs Available:  2
 >>> 
 ```
+
+### Can also run: $python3 -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+
+### Returns something like: 
+
+```
+python3 -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))"
+2024-11-03 20:23:25.403578: E external/local_xla/xla/stream_executor/cuda/cuda_fft.cc:477] Unable to register cuFFT factory: Attempting to register factory for plugin cuFFT when one has already been registered
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1730687005.414529  127133 cuda_dnn.cc:8310] Unable to register cuDNN factory: Attempting to register factory for plugin cuDNN when one has already been registered
+E0000 00:00:1730687005.418059  127133 cuda_blas.cc:1418] Unable to register cuBLAS factory: Attempting to register factory for plugin cuBLAS when one has already been registered
+2024-11-03 20:23:25.430394: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+[PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU'), PhysicalDevice(name='/physical_device:GPU:1', device_type='GPU')]
+```
