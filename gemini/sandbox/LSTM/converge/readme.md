@@ -233,3 +233,5 @@ def main():  # Main function
 
 if __name__ == "__main__":  # Checks if the script is being run as the main program
     main()  # Calls the main function
+![Figure_money](https://github.com/user-attachments/assets/11277611-b20b-462e-a86f-18190324ef97)
+![Figure_money2](https://github.com/user-attachments/assets/81ff6e20-5c14-4ba2-b79c-fa61764310aa)
