@@ -176,3 +176,71 @@ E0000 00:00:1730687005.418059  127133 cuda_blas.cc:1418] Unable to register cuBL
 To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
 [PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU'), PhysicalDevice(name='/physical_device:GPU:1', device_type='GPU')]
 ```
+### Further Troubleshooting
+
+The error messages you're seeing indicate that TensorFlow is having trouble loading the necessary GPU libraries. This can happen for several reasons, such as missing or incompatible CUDA or cuDNN libraries. Here are some steps to troubleshoot and resolve the issue:
+
+### 1. **Verify CUDA and cuDNN Installation**
+   - Ensure that you have the correct versions of CUDA and cuDNN installed that are compatible with your TensorFlow version.
+   - TensorFlow 2.x typically requires CUDA 11.x and cuDNN 8.x.
+
+### 2. **Check Environment Variables**
+   - Make sure the environment variables `LD_LIBRARY_PATH` and `PATH` are set correctly to point to the CUDA and cuDNN libraries.
+   - Example:
+     ```bash
+     export PATH=/usr/local/cuda/bin:$PATH
+     export LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+     ```
+
+### 3. **Reinstall TensorFlow with GPU Support**
+   - If you haven't already, reinstall TensorFlow with GPU support:
+     ```bash
+     pip uninstall tensorflow
+     pip install tensorflow-gpu
+     ```
+
+### 4. **Verify GPU Drivers**
+   - Ensure that your GPU drivers are up to date. You can check this with `nvidia-smi`.
+
+### 5. **Check TensorFlow Compatibility**
+   - Ensure that the TensorFlow version you are using is compatible with your CUDA and cuDNN versions. You can check the compatibility matrix [here](https://www.tensorflow.org/install/source#gpu).
+
+### 6. **Run a Simple GPU Test**
+   - Run a simple TensorFlow script to verify that TensorFlow can see and use the GPU.
+
+   ```python
+   import tensorflow as tf
+
+   # Check if TensorFlow can see the GPU
+   print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+
+   # Run a simple computation on the GPU
+   with tf.device('/GPU:0'):
+       a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
+       b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
+       c = tf.matmul(a, b)
+
+   print(c)
+   ```
+
+### 7. **Check for Missing Libraries**
+   - The error message mentions missing libraries. Ensure that all required libraries are installed. You can install them using the following commands:
+     ```bash
+     sudo apt-get install nvidia-driver-<version>
+     sudo apt-get install nvidia-cuda-toolkit
+     sudo apt-get install libcudnn8
+     ```
+
+### 8. **Rebuild TensorFlow from Source (Advanced)**
+   - If the above steps do not resolve the issue, you can try rebuilding TensorFlow from source with the appropriate compiler flags. This is an advanced option and requires a good understanding of building software from source.
+
+### Summary
+- **Verify CUDA and cuDNN**: Ensure they are correctly installed and compatible with TensorFlow.
+- **Environment Variables**: Set `LD_LIBRARY_PATH` and `PATH` correctly.
+- **Reinstall TensorFlow**: Ensure you have the GPU version installed.
+- **GPU Drivers**: Ensure they are up to date.
+- **Compatibility**: Check TensorFlow, CUDA, and cuDNN compatibility.
+- **Simple Test**: Run a simple TensorFlow script to verify GPU usage.
+- **Missing Libraries**: Ensure all required libraries are installed.
+
+By following these steps, you should be able to resolve the issue and get TensorFlow to recognize and use your GPU.
