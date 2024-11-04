@@ -197,3 +197,29 @@ if __name__ == "__main__":
 3. **Normalization**: Normalize the data to ensure that all features are on a similar scale.
 
 By following these steps, you can refactor the script to utilize the Gemini sandbox API ecosystem effectively for fetching historical price data and preparing it for time-series forecasting using TensorFlow.
+
+### What to Know about Gemini API:
+
+When working with the Gemini REST API, it's important to adhere to several key best practices to ensure your application functions correctly and efficiently. These include:
+
+1. **Understand Rate Limits**: Familiarize yourself with the rate limits imposed on both public and private endpoints. This will help you manage how often you can make requests without getting rate-limited.
+
+2. **Use Nonces Correctly**: For private API calls, always use a nonce that is unique for each request and increases monotonically within the session. If using time-based nonces, ensure they are within +/- 30 seconds of the Unix epoch timestamp.
+
+3. **Secure Your API Keys**: Keep your API keys secure. Do not hardcode them into your source code or expose them in environments where others can access them.
+
+4. **Implement Error Handling**: Properly handle errors and exceptions that may occur during API requests, such as network issues or invalid responses.
+
+5. **Use the Correct HTTP Method**: For public endpoints, use GET. For private endpoints, use POST and include the payload in the X-GEMINI-PAYLOAD header along with a signature.
+
+6. **Sign Your Requests**: When making private API calls, sign your requests using HMAC-SHA384 to ensure that only authorized users can make changes on your behalf.
+
+7. **Cache Data Appropriately**: For public endpoints like ticker data or candlestick charts, consider caching the results to reduce the number of requests and improve performance.
+
+8. **Use Pagination for Large Responses**: When querying trade history or other large datasets, use pagination parameters (like `limit_trades`) to avoid overwhelming your application with too much data at once.
+
+9. **Test Thoroughly**: Before deploying any code that interacts with the Gemini API, thoroughly test it in the sandbox environment to ensure it behaves as expected and handles edge cases correctly.
+
+10. **Adhere to Documentation**: Always refer back to the official Gemini documentation for details on specific endpoints, request parameters, and response formats.
+
+By following these best practices, you can ensure that your application interacts with the Gemini API effectively and securely.
