@@ -1,0 +1,16 @@
+# config.yaml
+data:
+  directory: '.'
+  seq_length: 5
+  window_size: 3
+
+training:
+  epochs: 60
+  batch_size: 32
+  shuffle_buffer_size: 10000
+
+model:
+  lstm_units: 250
+  dropout_rate: 0.2
+  dense_units: [200, 100]
+  final_dense_units: 1
