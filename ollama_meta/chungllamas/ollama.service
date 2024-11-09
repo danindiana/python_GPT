@@ -1,0 +1,16 @@
+[Unit]
+Description=Ollama Service
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/ollama serve
+User=ollama
+Group=ollama
+Restart=always
+RestartSec=3
+Environment="PATH=/path/to/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+Environment="OLLAMA_SCHED_SPREAD=1"
+Environment="CUDA_VISIBLE_DEVICES=0,1"  # Adjust GPU IDs as necessary
+
+[Install]
+WantedBy=default.target
