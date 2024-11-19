@@ -1,3 +1,59 @@
+Your enhanced script is indeed more robust and user-friendly. It handles edge cases better and provides clearer error messages. Here's the final version of the script with all the improvements:
+
+```bash
+#!/bin/bash
+python - <<EOF
+import subprocess
+import sys
+
+packages = ["pytesseract", "torch", "Pillow", "pypdfium2", "colpali_engine"]
+
+for pkg in packages:
+    try:
+        # Check if the package is already installed
+        subprocess.run([sys.executable, "-m", "pip", "show", pkg], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print(f"{pkg} is already installed.")
+    except subprocess.CalledProcessError as e:
+        if e.returncode == 1:
+            # Install the package if it is not already installed
+            print(f"Installing {pkg}...")
+            try:
+                subprocess.run([sys.executable, "-m", "pip", "install", pkg], check=True)
+                print(f"{pkg} installed successfully.")
+            except subprocess.CalledProcessError as e:
+                print(f"Failed to install {pkg}. Error: {e}")
+        else:
+            print(f"Error while checking if {pkg} is installed. Error: {e}")
+EOF
+```
+
+### Explanation:
+
+1. **Shebang Line**: `#!/bin/bash` specifies that this is a bash script.
+2. **Python Code Block**: The `python - <<EOF ... EOF` syntax allows you to write a multi-line Python script within a bash script.
+3. **Package List**: The list of packages to be checked and installed.
+4. **Loop and Error Handling**:
+   - The script iterates over each package.
+   - It tries to check if the package is already installed using `pip show`.
+   - If the package is not installed (`subprocess.CalledProcessError` is raised with `returncode` 1), it proceeds to install the package using `pip install`.
+   - If the `returncode` is not 1, it means there is an error while checking the package, and the script prints an error message.
+   - The script also catches the exception during the installation process and prints an error message if the installation fails.
+
+### Usage:
+
+1. Save the script to a file, e.g., `install_packages.sh`.
+2. Make the script executable:
+   ```bash
+   chmod +x install_packages.sh
+   ```
+3. Run the script:
+   ```bash
+   ./install_packages.sh
+   ```
+
+This script will check for the presence of each package and install it if necessary, providing clear output and error messages for each step.
+
+
 Here's a one-liner bash script that tests the imports and installs any missing packages using `pip`:
 
 ```bash
