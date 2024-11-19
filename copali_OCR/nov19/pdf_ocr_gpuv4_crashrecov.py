@@ -1,3 +1,6 @@
+#remove fitz import
+
+
 import os
 import pytesseract
 import fitz  # PyMuPDF for direct text extraction
