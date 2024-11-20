@@ -1,78 +1,3 @@
-```mermaid
-graph TD
-    A[Start] --> B[Set TESSDATA_PREFIX environment variable]
-    B --> C{Verify TESSDATA_PREFIX and eng.traineddata file}
-    C -->|Success| D[Define preprocess_image_for_ocr]
-    C -->|Failure| E[Raise FileNotFoundError]
-    D --> F[Define extract_text_without_ocr]
-    F --> G[Define extract_images_and_text_ocr]
-    G --> H[Define split_text_into_chunks]
-    H --> I[Define get_gpu_info]
-    I --> J[Define select_gpu]
-    J --> K[Define paths for progress tracking]
-    K --> L[Define load_progress]
-    L --> M[Define save_progress]
-    M --> N[Define save_output]
-    N --> O[Ask user for input and output directories]
-    O --> P{Verify directories exist}
-    P -->|Success| Q[Load progress at the beginning]
-    P -->|Failure| R[Print error message and exit]
-    Q --> S[Filter files to process]
-    S --> T{Check if files to process}
-    T -->|Yes| U[Prompt user to resume or start fresh]
-    T -->|No| V[Print message and exit]
-    U --> W{Resume or start fresh}
-    W -->|Resume| X[Load progress]
-    W -->|Start fresh| Y[Clear progress log]
-    X --> Z[Fetch GPU information and prompt user to select a GPU]
-    Y --> Z
-    Z --> AA[Set selected GPU for torch]
-    AA --> AB[Load model and processor]
-    AB --> AC[Set maximum chunk size and sequence length]
-    AC --> AD[Initialize list to store skipped files]
-    AD --> AE[Process each PDF file in input directory]
-    AE --> AF{Check file name length}
-    AF -->|Exceeds 200 characters| AG[Skip file]
-    AF -->|Within limit| AH[Set PDF path]
-    AG --> AE
-    AH --> AI[Extract images and text using OCR]
-    AI --> AJ[Print processing message]
-    AJ --> AK[Save OCR text to output file]
-    AK --> AL[Print save message]
-    AL --> AM{Check if images are present}
-    AM -->|Yes| AN[Process images]
-    AM -->|No| AO[Print message]
-    AN --> AO
-    AO --> AP{Check if direct text extraction is empty}
-    AP -->|Yes| AQ[Set PDF text to OCR text]
-    AP -->|No| AR[Check if PDF text is not empty]
-    AQ --> AR
-    AR -->|Yes| AS[Split text into chunks]
-    AR -->|No| AT[Print message]
-    AS --> AU[Process text chunks]
-    AU --> AV{Check if chunk length exceeds max sequence length}
-    AV -->|Yes| AW[Skip file]
-    AV -->|No| AX[Process queries]
-    AW --> AE
-    AX --> AY[Generate query embeddings]
-    AY --> AZ[Calculate similarity scores]
-    AZ --> BA[Print average similarity score]
-    BA --> BB[Add file to processed list]
-    BB --> BC[Save progress]
-    BC --> BD[Print success message]
-    BD --> AE
-    AT --> AE
-    AE --> BE[Clear GPU cache and collect garbage]
-    BE --> BF{Check if skipped files are present}
-    BF -->|Yes| BG[Print list of skipped files]
-    BF -->|No| BH[Print message]
-    BG --> BI[End]
-    BH --> BI
-```
-
-This Mermaid diagram provides a visual representation of the program's flow, highlighting the key steps and decision points in the process. You can visualize this diagram using any Mermaid live editor or integrating it into a Markdown file that supports Mermaid syntax.
-
-
 Here's a tree-like pseudo code representation of the provided Python script:
 
 ```
@@ -262,3 +187,77 @@ else
 ```
 
 This pseudo code provides a structured overview of the script, highlighting the main functions, their purposes, and the flow of operations.
+
+```mermaid
+graph TD
+    A[Start] --> B[Set TESSDATA_PREFIX environment variable]
+    B --> C{Verify TESSDATA_PREFIX and eng.traineddata file}
+    C -->|Success| D[Define preprocess_image_for_ocr]
+    C -->|Failure| E[Raise FileNotFoundError]
+    D --> F[Define extract_text_without_ocr]
+    F --> G[Define extract_images_and_text_ocr]
+    G --> H[Define split_text_into_chunks]
+    H --> I[Define get_gpu_info]
+    I --> J[Define select_gpu]
+    J --> K[Define paths for progress tracking]
+    K --> L[Define load_progress]
+    L --> M[Define save_progress]
+    M --> N[Define save_output]
+    N --> O[Ask user for input and output directories]
+    O --> P{Verify directories exist}
+    P -->|Success| Q[Load progress at the beginning]
+    P -->|Failure| R[Print error message and exit]
+    Q --> S[Filter files to process]
+    S --> T{Check if files to process}
+    T -->|Yes| U[Prompt user to resume or start fresh]
+    T -->|No| V[Print message and exit]
+    U --> W{Resume or start fresh}
+    W -->|Resume| X[Load progress]
+    W -->|Start fresh| Y[Clear progress log]
+    X --> Z[Fetch GPU information and prompt user to select a GPU]
+    Y --> Z
+    Z --> AA[Set selected GPU for torch]
+    AA --> AB[Load model and processor]
+    AB --> AC[Set maximum chunk size and sequence length]
+    AC --> AD[Initialize list to store skipped files]
+    AD --> AE[Process each PDF file in input directory]
+    AE --> AF{Check file name length}
+    AF -->|Exceeds 200 characters| AG[Skip file]
+    AF -->|Within limit| AH[Set PDF path]
+    AG --> AE
+    AH --> AI[Extract images and text using OCR]
+    AI --> AJ[Print processing message]
+    AJ --> AK[Save OCR text to output file]
+    AK --> AL[Print save message]
+    AL --> AM{Check if images are present}
+    AM -->|Yes| AN[Process images]
+    AM -->|No| AO[Print message]
+    AN --> AO
+    AO --> AP{Check if direct text extraction is empty}
+    AP -->|Yes| AQ[Set PDF text to OCR text]
+    AP -->|No| AR[Check if PDF text is not empty]
+    AQ --> AR
+    AR -->|Yes| AS[Split text into chunks]
+    AR -->|No| AT[Print message]
+    AS --> AU[Process text chunks]
+    AU --> AV{Check if chunk length exceeds max sequence length}
+    AV -->|Yes| AW[Skip file]
+    AV -->|No| AX[Process queries]
+    AW --> AE
+    AX --> AY[Generate query embeddings]
+    AY --> AZ[Calculate similarity scores]
+    AZ --> BA[Print average similarity score]
+    BA --> BB[Add file to processed list]
+    BB --> BC[Save progress]
+    BC --> BD[Print success message]
+    BD --> AE
+    AT --> AE
+    AE --> BE[Clear GPU cache and collect garbage]
+    BE --> BF{Check if skipped files are present}
+    BF -->|Yes| BG[Print list of skipped files]
+    BF -->|No| BH[Print message]
+    BG --> BI[End]
+    BH --> BI
+```
+
+This Mermaid diagram provides a visual representation of the program's flow, highlighting the key steps and decision points in the process. You can visualize this diagram using any Mermaid live editor or integrating it into a Markdown file that supports Mermaid syntax.
