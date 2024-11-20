@@ -1,3 +1,22 @@
+Differences Between the Two Code Versions
+Output File Format Handling:
+
+Version 1: The save_output function supports saving the output in three formats: txt, json, and csv. The user is prompted to specify the desired output format.
+
+Version 2: The output is always saved as a .txt file. There is no prompt for the user to specify the output format.
+
+Graceful Shutdown Handling:
+
+Version 1: Does not include any specific handling for graceful shutdowns.
+
+Version 2: Includes a signal_handler function that handles the SIGINT signal (e.g., when the user presses Ctrl+C). This function performs a graceful shutdown by saving the progress and cleaning up resources.
+
+Error Logging:
+
+Version 1: Includes an optional error logging mechanism where errors are written to an error.log file.
+
+Version 2: Does not explicitly mention error logging, but the error handling mechanism is similar to Version 1.
+
 This code is a comprehensive script designed to process PDF files, extract text and images, and perform various operations such as OCR (Optical Character Recognition), text preprocessing, and similarity scoring using a deep learning model. Below is a detailed explanation of how the code works:
 
 ### 1. **Imports and Environment Setup**
