@@ -1,5 +1,3 @@
-Certainly! Below is a Mermaid diagram representing the flow of the program's operation:
-
 ```mermaid
 graph TD
     A[Start] --> B[Set TESSDATA_PREFIX environment variable]
