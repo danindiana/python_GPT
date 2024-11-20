@@ -1,4 +1,4 @@
-Yes, the combined code allows for starting, stopping, and resuming the processing of PDF files. It also supports graceful shutdown by the user. Here's how these features are implemented:
+The combined code allows for starting, stopping, and resuming the processing of PDF files. It also supports graceful shutdown by the user. Here's how these features are implemented:
 
 ### Starting/Stopping/Resuming:
 1. **Progress Tracking**:
