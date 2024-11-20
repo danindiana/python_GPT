@@ -1,193 +1,127 @@
-Here's a tree-like pseudo code representation of the provided Python script:
+This code is a comprehensive script designed to process PDF files, extract text and images, and perform various operations such as OCR (Optical Character Recognition), text preprocessing, and similarity scoring using a deep learning model. Below is a detailed explanation of how the code works:
 
-```
-import necessary libraries
+### 1. **Imports and Environment Setup**
+   - **Imports**: The script imports various libraries including `os`, `pytesseract`, `pymupdf`, `torch`, `PIL`, `pypdfium2`, and custom modules from `colpali_engine`.
+   - **TESSDATA_PREFIX**: The script sets the `TESSDATA_PREFIX` environment variable to specify the path to Tesseract OCR's language data. It then verifies the existence of the directory and the `eng.traineddata` file.
 
-set TESSDATA_PREFIX environment variable
-verify TESSDATA_PREFIX and eng.traineddata file
+### 2. **Image Preprocessing for OCR**
+   - **`preprocess_image_for_ocr(image)`**: This function preprocesses an image to improve OCR accuracy. It converts the image to grayscale, increases contrast, and applies a binary threshold.
 
-define preprocess_image_for_ocr(image)
-    convert image to grayscale
-    increase contrast
-    apply binary threshold
-    return processed image
+### 3. **Text Extraction from PDF**
+   - **`extract_text_without_ocr(pdf_path)`**: This function attempts to extract embedded text directly from a PDF using PyMuPDF (`pymupdf`). If the PDF contains embedded text, it is extracted without using OCR.
 
-define extract_text_without_ocr(pdf_path)
-    initialize text variable
-    try
-        open PDF using PyMuPDF
-        for each page in PDF
-            append page text to text variable
-    except MuPDF error
-        print error message
-        return empty string
-    return text
+### 4. **Image and Text Extraction with OCR**
+   - **`extract_images_and_text_ocr(pdf_path, resize_factor=2)`**: This function extracts images and text from a PDF. If the PDF does not contain embedded text, it uses OCR to extract text from images. The images are resized and preprocessed before OCR.
 
-define extract_images_and_text_ocr(pdf_path, resize_factor)
-    initialize images list
-    extract text without OCR
-    if extracted text is not empty
-        return images, extracted text, extracted text
-    try
-        load PDF using PdfDocument
-    except Exception
-        print error message
-        return empty list, empty string, empty string
-    initialize ocr_text variable
-    for each page in PDF
-        get page size
-        render page to bitmap
-        try
-            convert bitmap to PIL image
-        except AttributeError
-            convert bitmap to pixmap and then to PIL image
-        resize PIL image
-        preprocess PIL image for OCR
-        try
-            perform OCR on processed image
-        except TesseractError
-            print error message
-        append OCR text to ocr_text variable
-        append PIL image to images list
-    return images, empty string, ocr_text
+### 5. **Text Chunking**
+   - **`split_text_into_chunks(text, chunk_size)`**: This function splits a large text into smaller chunks of a specified size, which is useful for processing large texts in manageable parts.
 
-define split_text_into_chunks(text, chunk_size)
-    split text into words
-    return list of text chunks
+### 6. **GPU Information and Selection**
+   - **`get_gpu_info()`**: This function fetches GPU information using `nvidia-smi` and returns a list of available GPUs along with their utilization.
+   - **`select_gpu(gpus)`**: This function prompts the user to select a GPU from the available options.
 
-define get_gpu_info()
-    run nvidia-smi command
-    decode output
-    initialize gpus list
-    for each line in output
-        split line into index, name, utilization
-        append GPU info to gpus list
-    return gpus
+### 7. **Progress Tracking**
+   - **`load_progress()`**: Loads the list of processed files from a log file.
+   - **`save_progress(processed_files)`**: Saves the list of processed files to a log file.
 
-define select_gpu(gpus)
-    print available GPUs
-    prompt user to select a GPU
-    return selected GPU index
+### 8. **Output Saving**
+   - **`save_output(output_file, content, file_format)`**: Saves the extracted text to a specified file format (txt, json, csv).
 
-define paths for progress tracking
+### 9. **User Input and Directory Verification**
+   - The script prompts the user to input the target directory containing PDF files, the output directory for processed text files, and the desired output format. It then verifies that the directories exist.
 
-define load_progress()
-    if progress file exists
-        load processed files from progress file
-    return set of processed files
+### 10. **Processing PDF Files**
+   - **Loading Progress**: The script loads the list of already processed files to avoid reprocessing them.
+   - **Filtering Files**: It filters out PDF files that have already been processed.
+   - **Resume or Start Fresh**: The user is prompted to decide whether to resume from the last stop or start fresh.
+   - **GPU Selection**: The user selects a GPU for processing.
 
-define save_progress(processed_files)
-    save processed files to progress file
+### 11. **Model Loading**
+   - The script loads a deep learning model (`ColQwen2`) and its processor (`ColQwen2Processor`) onto the selected GPU. The model is set to evaluation mode and uses half-precision (`torch.float16`) to save memory.
 
-define save_output(output_file, content, file_format)
-    if file_format is txt
-        write content to text file
-    elif file_format is json
-        write content to JSON file
-    elif file_format is csv
-        write content to CSV file
-    else
-        raise ValueError for unsupported file format
+### 12. **Processing Each PDF File**
+   - **File Length Check**: The script skips files with names longer than 200 characters.
+   - **Text and Image Extraction**: It extracts images and text from each PDF file. If the PDF contains embedded text, it uses that; otherwise, it uses OCR.
+   - **Saving OCR Output**: The OCR-like text is saved to a file in the output directory.
+   - **Image Processing**: The script processes images in batches to prevent out-of-memory errors. It generates embeddings for the images using the deep learning model.
+   - **Text Processing**: If the PDF contains text, the script splits it into chunks and processes each chunk using the model. It calculates similarity scores between the text chunks and image embeddings.
+   - **Progress Saving**: After processing each file, the script saves the progress to the log file.
 
-ask user for input and output directories
-verify directories exist
+### 13. **Error Handling and Final Cleanup**
+   - **Error Handling**: The script catches and logs any errors that occur during processing.
+   - **Memory Cleanup**: After processing, the script clears GPU memory and garbage collects to free up resources.
+   - **Skipped Files**: The script lists any files that were skipped due to errors or other issues.
 
-load progress at the beginning
-filter files to process
-if no files to process
-    print message and exit
+### Summary
+This script is a sophisticated tool for processing PDF files, extracting text and images, and performing deep learning-based operations such as OCR and similarity scoring. It includes robust error handling, progress tracking, and memory management to ensure efficient and reliable processing of large volumes of PDF files.
 
-prompt user to resume or start fresh
-if not resuming
-    clear progress log
 
-fetch GPU information and prompt user to select a GPU
-set selected GPU for torch
+### Importance of Not Including `fitz` Import
 
-load model and processor
-set maximum chunk size and sequence length
+The `fitz` import is typically associated with PyMuPDF, a Python binding for the MuPDF library, which is used for handling PDF files. However, in the provided code, the import statement for `fitz` is not included. Here are some reasons why this might be important:
 
-initialize list to store skipped files
+1. **Clarity and Maintainability**:
+   - **Explicit Dependencies**: By not including unnecessary imports, the code maintains clarity about its dependencies. This makes it easier for other developers to understand which libraries are actually being used.
+   - **Reduced Complexity**: Fewer imports mean less potential for conflicts or confusion about which library is being used for what purpose.
 
-for each PDF file in input directory
-    if file name length exceeds 200 characters
-        print message and skip file
-    set PDF path
-    try
-        extract images and text using OCR
-        print processing message
-        save OCR text to output file
-        print save message
-        initialize list for image embeddings
-        if images are present
-            for each image in images
-                process image batch
-                try
-                    print processing message
-                    generate image embeddings
-                    append embeddings to list
-                except Exception
-                    print error message
-                    clear GPU cache and collect garbage
-                clear GPU cache and collect garbage
-            if image embeddings are present
-                concatenate image embeddings
-            else
-                set image embeddings to None
-                print message
-        else
-            set image embeddings to None
-            print message
-        if direct text extraction is empty and OCR text is present
-            set PDF text to OCR text
-        if PDF text is not empty
-            print processing message
-            split text into chunks
-            initialize list for similarity scores
-            for each chunk in text chunks
-                if chunk length exceeds max sequence length
-                    print message and skip file
-                try
-                    process queries
-                    try
-                        print processing message
-                        generate query embeddings
-                        clear GPU cache and collect garbage
-                        if image embeddings are present
-                            calculate similarity scores
-                            append score to list
-                    except Exception
-                        print error message
-                        clear GPU cache and collect garbage
-                except CUDA OutOfMemoryError
-                    print message
-                    clear GPU cache and collect garbage
-                    skip file
-            if similarity scores are present
-                calculate average similarity score
-                print average score
-            else
-                print message
-        else
-            print message
-        add file to processed list
-        save progress
-        print success message
-    except Exception
-        print error message
-        log error to file
-        continue
+2. **Performance and Resource Management**:
+   - **Reduced Overhead**: Importing fewer modules reduces the initial overhead of loading the script. This can be particularly important in environments where startup time is critical.
+   - **Memory Efficiency**: Each imported module consumes memory. By only importing what is necessary, the script is more memory-efficient.
 
-clear GPU cache and collect garbage
+3. **Error Prevention**:
+   - **Avoiding Conflicts**: Different libraries might have overlapping functionality or naming conventions. Not importing `fitz` avoids potential conflicts with other libraries that might be imported.
+   - **Dependency Management**: Ensuring that only the necessary dependencies are imported simplifies dependency management and reduces the risk of version conflicts.
 
-if skipped files are present
-    print list of skipped files
-else
-    print message
-```
+### Importance of Getting TESSDATA Right from Bash/Host System Standpoint
 
-This pseudo code provides a structured overview of the script, highlighting the main functions, their purposes, and the flow of operations.
+Setting up the `TESSDATA_PREFIX` correctly and ensuring that the Tesseract OCR language data files are available is crucial for the proper functioning of the OCR functionality in the script. Here’s why:
 
+1. **Correct Environment Setup**:
+   - **Environment Variables**: The `TESSDATA_PREFIX` environment variable tells Tesseract where to find its language data files. Setting this correctly ensures that Tesseract can locate the necessary files without errors.
+   - **Consistency**: Ensuring that the environment variable is set correctly across different environments (development, testing, production) ensures consistent behavior of the OCR functionality.
+
+2. **Error Handling and Debugging**:
+   - **FileNotFoundError**: The script explicitly checks for the existence of the `tessdata` directory and the `eng.traineddata` file. This proactive error handling prevents runtime errors and provides clear feedback if the setup is incorrect.
+   - **User Feedback**: By raising a `FileNotFoundError`, the script informs the user about the missing files, guiding them on how to resolve the issue.
+
+3. **Performance and Accuracy**:
+   - **OCR Accuracy**: Tesseract’s performance and accuracy depend on the quality and availability of its trained data. Ensuring that the correct language data is available improves the accuracy of the OCR results.
+   - **Resource Utilization**: Proper setup ensures that Tesseract can efficiently utilize the available resources, leading to better performance.
+
+### Practical Steps to Ensure TESSDATA Setup
+
+From a bash/host system standpoint, here are the practical steps to ensure the TESSDATA setup is correct:
+
+1. **Install Tesseract**:
+   - Ensure Tesseract OCR is installed on the system. This can be done using package managers like `apt` on Ubuntu:
+     ```bash
+     sudo apt-get install tesseract-ocr
+     ```
+
+2. **Set TESSDATA_PREFIX**:
+   - Set the `TESSDATA_PREFIX` environment variable to point to the directory containing the Tesseract language data. This can be done in the `.bashrc` or `.bash_profile` file:
+     ```bash
+     export TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/
+     ```
+   - Reload the shell configuration:
+     ```bash
+     source ~/.bashrc
+     ```
+
+3. **Verify Installation**:
+   - Verify that the `tessdata` directory and the `eng.traineddata` file exist in the specified path:
+     ```bash
+     ls $TESSDATA_PREFIX/tessdata/eng.traineddata
+     ```
+   - If the file is missing, download the language data:
+     ```bash
+     sudo apt-get install tesseract-ocr-eng
+     ```
+
+4. **Run the Script**:
+   - Ensure the script is run in an environment where the `TESSDATA_PREFIX` is correctly set and the necessary files are available.
+
+By following these steps, you ensure that the Tesseract OCR setup is correct, leading to reliable and accurate OCR results in the script. This setup is crucial for the OCR functionality to work as expected, especially in automated or production environments.
 ```mermaid
 graph TD
     A[Start] --> B[Set TESSDATA_PREFIX environment variable]
