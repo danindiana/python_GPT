@@ -8,7 +8,8 @@ from colpali_engine.models import ColQwen2, ColQwen2Processor
 import subprocess
 import gc
 import json
-import csv
+import signal
+import sys
 
 # Set TESSDATA_PREFIX if needed
 os.environ['TESSDATA_PREFIX'] = '/usr/share/tesseract-ocr/5/'
@@ -128,26 +129,21 @@ def save_progress(processed_files):
     with open(progress_file, "w") as f:
         json.dump(list(processed_files), f)
 
-def save_output(output_file, content, file_format):
-    """Save the output content to the specified file format."""
-    if file_format == "txt":
-        with open(output_file, "w") as f:
-            f.write(content)
-    elif file_format == "json":
-        with open(output_file, "w") as f:
-            json.dump({"content": content}, f)
-    elif file_format == "csv":
-        with open(output_file, "w", newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(["Content"])
-            writer.writerow([content])
-    else:
-        raise ValueError(f"Unsupported file format: {file_format}")
+def signal_handler(sig, frame):
+    """Handle the SIGINT signal to perform a graceful shutdown."""
+    print("\nReceived shutdown signal. Cleaning up resources and saving progress...")
+    save_progress(processed_files)
+    torch.cuda.empty_cache()
+    gc.collect()
+    print("Graceful shutdown complete. Exiting...")
+    sys.exit(0)
+
+# Register the signal handler
+signal.signal(signal.SIGINT, signal_handler)
 
 # Ask the user for input and output directories
 input_dir = input("Enter the path of the target directory containing PDF files: ")
 output_dir = input("Enter the path of the output directory for processed text files: ")
-output_format = input("Enter the desired output format (txt, json, csv): ").strip().lower()
 
 # Verify the directories exist
 if not os.path.isdir(input_dir):
@@ -211,8 +207,10 @@ for pdf_file in pdf_files:
         print(f"Processing images for {pdf_file}...")
 
         # Save OCR-like text to a file in the output directory
-        output_file = os.path.join(output_dir, f"{pdf_file}_ocr_output.{output_format}")
-        save_output(output_file, ocr_text, output_format)
+        output_file = os.path.join(output_dir, f"{pdf_file}_ocr_output.txt")
+        with open(output_file, "w") as f:
+            f.write("OCR-like extracted text:\n")
+            f.write(ocr_text)
 
         print(f"\nOCR-like extracted text saved to {output_file}")
 
