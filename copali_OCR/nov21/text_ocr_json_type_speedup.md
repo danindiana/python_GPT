@@ -67,6 +67,80 @@ elif output_format == 'json':
 2. **Better CPU Utilization**: Less time spent on string concatenations and line-by-line iterations.
 3. **Improved Scalability**: Handles larger documents more efficiently with reduced memory and CPU usage.
 
+Great question! It's worth verifying whether the GPU is actively involved in the computational workload, especially since your script combines GPU-based deep learning operations (via PyTorch) with traditional OCR functions like Tesseract. Here's how to investigate and confirm:
+
+---
+
+### Where GPU Might Be Used in Your Script
+1. **Model-Based Image Processing**:
+   - The **model** loaded via `load_model_and_processor` is likely a deep learning model for image or text embeddings, which runs on the GPU.
+   - Functions like `processor.process_images()` and `model(**batch_images)` suggest GPU utilization, as they use PyTorch tensors and `.to(device)` for computation.
+
+2. **Text Processing**:
+   - Traditional OCR extraction (e.g., via Tesseract in `extract_images_and_text_ocr`) is CPU-bound unless explicitly configured to use GPU-accelerated libraries like OpenCV's CUDA extensions.
+
+3. **Similarity Scoring**:
+   - If you're computing similarity scores using embeddings (e.g., `processor.score_multi_vector`), that operation may run on the GPU, depending on the library implementation and tensor placement.
+
+---
+
+### Likely Bottleneck: Tesseract OCR
+Tesseract OCR is **not GPU-accelerated** by default. It processes images using the CPU, and its performance depends on:
+- CPU speed and core count.
+- Image preprocessing efficiency (e.g., resizing, cleaning).
+
+If most of your time is spent in `extract_images_and_text_ocr`, the GPU might not be contributing significantly to the OCR step.
+
+---
+
+### How to Confirm GPU Utilization
+1. **Monitor GPU Usage**:
+   - Use tools like `nvidia-smi` to monitor GPU activity while the script is running.
+     ```bash
+     watch -n 1 nvidia-smi
+     ```
+     Look for non-zero utilization in `Volatile GPU-Util` and memory usage. If these values remain near zero, the GPU is likely underutilized.
+
+2. **Log GPU Activity**:
+   - Add logging around GPU-bound operations:
+     ```python
+     import time
+     start_time = time.time()
+     # GPU operation
+     end_time = time.time()
+     print(f"Time for GPU operation: {end_time - start_time:.2f} seconds")
+     ```
+
+3. **Disable GPU Temporarily**:
+   - Force the model and embeddings to run on the CPU to compare performance:
+     ```python
+     device = torch.device("cpu")
+     model, processor = load_model_and_processor(device)
+     ```
+     If the performance remains similar, the GPU isn't contributing significantly.
+
+4. **Isolate GPU Work**:
+   - Focus on GPU-heavy functions (e.g., `model(**batch_images)`) and temporarily skip Tesseract OCR to measure their standalone runtime.
+
+---
+
+### Improving GPU Utilization
+If the GPU is underutilized and you want to leverage it for OCR-like tasks:
+1. **CUDA-Accelerated OCR**:
+   - Use OpenCV's CUDA backend for preprocessing and text extraction if applicable.
+2. **GPU-Optimized OCR Models**:
+   - Replace Tesseract with a deep learning-based OCR model like:
+     - [EasyOCR](https://github.com/JaidedAI/EasyOCR): Supports GPU acceleration.
+     - [TrOCR](https://huggingface.co/transformers/model_doc/trocr.html): A Transformer-based OCR model designed for GPUs.
+
+3. **Batch Image Processing**:
+   - Ensure image preprocessing and OCR are done in batches to maximize GPU throughput.
+
+---
+
+### Conclusion
+Currently, Tesseract OCR is likely CPU-bound, meaning most of your script's performance depends on CPU processing. The GPU is likely only used for deep learning tasks (e.g., embeddings or scoring). To confirm and optimize, monitor GPU usage and consider moving to a GPU-accelerated OCR pipeline if needed.
+
 ---
 
 This approach makes the `txt` processing pipeline almost as fast as JSON while retaining the simplicity of plain text output.
