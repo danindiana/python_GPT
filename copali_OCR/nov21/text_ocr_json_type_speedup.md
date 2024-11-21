@@ -144,3 +144,113 @@ Currently, Tesseract OCR is likely CPU-bound, meaning most of your script's perf
 ---
 
 This approach makes the `txt` processing pipeline almost as fast as JSON while retaining the simplicity of plain text output.
+
+Yes, you can recursively read the content of these files and concatenate their outputs into either a single text file or a JSON file. Here’s how you can achieve this using a Python script.
+
+---
+
+### Script for Merging Files into a Single Output
+
+```python
+import os
+import json
+
+# Define the directory and output file names
+directory = "."  # Change this to your target directory if not the current one
+text_output_file = "combined_output.txt"
+json_output_file = "combined_output.json"
+
+# Initialize containers for text and JSON output
+all_text_content = []
+all_json_content = {}
+
+# Recursively process files in the directory
+for root, _, files in os.walk(directory):
+    for file in files:
+        if file.endswith(".py") or file.endswith(".log"):  # Target Python and log files
+            file_path = os.path.join(root, file)
+            try:
+                with open(file_path, "r") as f:
+                    content = f.read()
+                    all_text_content.append(f"File: {file}\n{content}\n{'-'*80}\n")
+                    all_json_content[file] = content
+            except Exception as e:
+                print(f"Error reading {file_path}: {e}")
+
+# Write to the text file
+with open(text_output_file, "w") as text_file:
+    text_file.write("\n".join(all_text_content))
+print(f"All content has been concatenated into {text_output_file}")
+
+# Write to the JSON file
+with open(json_output_file, "w") as json_file:
+    json.dump(all_json_content, json_file, indent=4)
+print(f"All content has been saved in JSON format to {json_output_file}")
+```
+
+---
+
+### What This Script Does:
+1. **Directory Traversal**:
+   - Uses `os.walk` to recursively traverse the directory and subdirectories.
+   
+2. **File Filtering**:
+   - Processes only `.py` and `.log` files, based on the extensions you listed. You can add more extensions as needed.
+
+3. **Read and Store Content**:
+   - Reads the content of each file and appends it to:
+     - A list (`all_text_content`) for text output.
+     - A dictionary (`all_json_content`) for JSON output, where filenames are keys, and their contents are values.
+
+4. **Output to `txt`**:
+   - Writes all concatenated content to a single text file, including separators between files for readability.
+
+5. **Output to `json`**:
+   - Saves all file contents in JSON format, where each file's content is stored under its filename.
+
+---
+
+### Example Output:
+#### `combined_output.txt`
+```
+File: error.log
+[Error] Missing file...
+--------------------------------------------------------------------------------
+File: main_script.py
+import os
+import torch
+...
+--------------------------------------------------------------------------------
+```
+
+#### `combined_output.json`
+```json
+{
+    "error.log": "[Error] Missing file...",
+    "main_script.py": "import os\nimport torch\n..."
+}
+```
+
+---
+
+### Customization Options:
+- **Add more file extensions**:
+  Modify the line:
+  ```python
+  if file.endswith(".py") or file.endswith(".log"):
+  ```
+  to include other extensions like `.txt`, `.md`, etc.
+
+- **Target specific directories**:
+  Replace `directory = "."` with the path to your target directory.
+
+- **Handle large files**:
+  If files are very large, consider reading them line-by-line to manage memory usage:
+  ```python
+  with open(file_path, "r") as f:
+      for line in f:
+          all_text_content.append(line)
+          # Or append to the JSON dictionary piece by piece
+  ```
+
+This script should efficiently aggregate the contents of your listed files into either format!
