@@ -254,3 +254,96 @@ import torch
   ```
 
 This script should efficiently aggregate the contents of your listed files into either format!
+
+To add an option to ignore specific files like `processed_files.log`, you can simply check the filename during the traversal and skip it if it matches the ignored file. Here's the updated script:
+
+---
+
+### Updated Script to Ignore Specific Files
+
+```python
+import os
+import json
+
+# Define the directory and output file names
+directory = "."  # Change this to your target directory if not the current one
+text_output_file = "combined_output.txt"
+json_output_file = "combined_output.json"
+
+# Files to ignore
+ignored_files = {"processed_files.log"}
+
+# Initialize containers for text and JSON output
+all_text_content = []
+all_json_content = {}
+
+# Recursively process files in the directory
+for root, _, files in os.walk(directory):
+    for file in files:
+        if file in ignored_files:  # Skip ignored files
+            print(f"Skipping {file}")
+            continue
+        if file.endswith(".py") or file.endswith(".log"):  # Target Python and log files
+            file_path = os.path.join(root, file)
+            try:
+                with open(file_path, "r") as f:
+                    content = f.read()
+                    all_text_content.append(f"File: {file}\n{content}\n{'-'*80}\n")
+                    all_json_content[file] = content
+            except Exception as e:
+                print(f"Error reading {file_path}: {e}")
+
+# Write to the text file
+with open(text_output_file, "w") as text_file:
+    text_file.write("\n".join(all_text_content))
+print(f"All content has been concatenated into {text_output_file}")
+
+# Write to the JSON file
+with open(json_output_file, "w") as json_file:
+    json.dump(all_json_content, json_file, indent=4)
+print(f"All content has been saved in JSON format to {json_output_file}")
+```
+
+---
+
+### Changes Made:
+1. **Ignore Specific Files**:
+   - Added a set `ignored_files` containing files to be skipped, e.g., `{"processed_files.log"}`.
+   - Before processing each file, the script checks:
+     ```python
+     if file in ignored_files:
+         continue
+     ```
+
+2. **Logging Skipped Files**:
+   - Prints a message to indicate when a file is skipped:
+     ```python
+     print(f"Skipping {file}")
+     ```
+
+---
+
+### How It Works:
+1. The script checks every file against the `ignored_files` set.
+2. If a file is in the set, it skips processing that file and moves to the next one.
+3. All other files are processed as before and written to the combined text and JSON outputs.
+
+---
+
+### Example Output:
+If `processed_files.log` exists in the directory:
+```
+Skipping processed_files.log
+All content has been concatenated into combined_output.txt
+All content has been saved in JSON format to combined_output.json
+```
+
+---
+
+### Customization:
+- **Add more ignored files**: Extend the `ignored_files` set with additional filenames:
+  ```python
+  ignored_files = {"processed_files.log", "some_other_file.log"}
+  ```
+
+This way, you can easily exclude any files from being processed without affecting the rest of the script.
