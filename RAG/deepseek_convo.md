@@ -1089,3 +1089,641 @@ Error Handling: Improved error handling to manage exceptions.
 GPU Memory Monitoring: Added a function to monitor GPU memory usage.
 
 By making these adjustments, you should be able to generate embeddings more reliably and manage memory usage effectively.
+
+
+The error you're encountering suggests that the embeddings are being moved to the CPU after generation, which might be causing issues. This could be due to memory constraints or other internal workings of the SentenceTransformer library.
+
+To address this, let's make a few adjustments:
+
+Reduce the Batch Size: Start with a smaller batch size to avoid memory issues.
+
+Check GPU Memory Usage: Monitor GPU memory usage to ensure it doesn't exceed available memory.
+
+Error Handling: Add more robust error handling to catch and manage exceptions.
+
+Logging: Improve logging to track the progress and any errors encountered.
+
+Here's the updated code with these adjustments:
+
+python
+Copy
+import os
+import json
+from sentence_transformers import SentenceTransformer
+import torch
+import numpy as np
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Step 1: Choose a pre-trained model
+model_name = "all-MiniLM-L6-v2"
+
+# Step 2: Load the pre-trained SentenceTransformer model
+# Utilize GPUs by setting device="cuda"
+model = SentenceTransformer(model_name, device="cuda")
+
+# Step 3: Check the number of GPUs available
+logging.info(f"Number of GPUs available: {torch.cuda.device_count()}")
+
+# Step 4: Prompt the user for the directory
+directory = input("Enter the directory containing text or JSON files: ")
+
+# Step 5: Recursively process files in the directory
+def process_directory(directory):
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                if file.endswith(".txt"):
+                    logging.info(f"Processing text file: {file_path}")
+                    process_text_file(file_path)
+                elif file.endswith(".json"):
+                    logging.info(f"Processing JSON file: {file_path}")
+                    process_json_file(file_path)
+            except Exception as e:
+                logging.error(f"Error processing file {file_path}: {e}")
+
+def process_text_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            text_content = file.read()
+            sentences = text_content.split('\n')
+            generate_embeddings(sentences)
+    except Exception as e:
+        logging.error(f"Error reading text file {file_path}: {e}")
+
+def process_json_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            json_content = json.load(file)
+            # Assuming the JSON structure is a list of sentences or a dictionary with a 'text' key
+            if isinstance(json_content, list):
+                sentences = json_content
+            elif isinstance(json_content, dict) and 'text' in json_content:
+                sentences = json_content['text'].split('\n')
+            else:
+                logging.warning(f"Skipping JSON file {file_path} due to unsupported format.")
+                return
+            generate_embeddings(sentences)
+    except Exception as e:
+        logging.error(f"Error reading JSON file {file_path}: {e}")
+
+def generate_embeddings(sentences):
+    if sentences:
+        try:
+            embeddings = model.encode(sentences, batch_size=32, show_progress_bar=True)
+            logging.info(f"Embeddings shape: {embeddings.shape}")
+            save_embeddings(embeddings, 'embeddings.npy')
+        except Exception as e:
+            logging.error(f"Error generating embeddings: {e}")
+
+def save_embeddings(embeddings, file_path):
+    try:
+        np.save(file_path, embeddings)
+        logging.info(f"Embeddings saved to {file_path}")
+    except Exception as e:
+        logging.error(f"Error saving embeddings to {file_path}: {e}")
+
+# Step 6: Start processing the directory
+process_directory(directory)
+Key Adjustments:
+Reduced Batch Size: Set batch_size=32 to avoid memory issues.
+
+Logging: Added logging to track progress and errors.
+
+Error Handling: Added more robust error handling to manage exceptions during file reading, embedding generation, and saving.
+
+Monitoring GPU Memory:
+To monitor GPU memory usage, you can use the following code snippet:
+
+python
+Copy
+import torch
+
+def print_gpu_memory_usage():
+    print(f"GPU Memory Allocated: {torch.cuda.memory_allocated() / 1024 ** 2} MB")
+    print(f"GPU Memory Reserved: {torch.cuda.memory_reserved() / 1024 ** 2} MB")
+
+# Call this function periodically to monitor memory usage
+print_gpu_memory_usage()
+Summary:
+Batch Size: Reduced to 32 to avoid memory issues.
+
+Logging: Added logging for progress tracking and error reporting.
+
+Error Handling: Improved error handling to manage exceptions.
+
+GPU Memory Monitoring: Added a function to monitor GPU memory usage.
+
+By making these adjustments, you should be able to generate embeddings more reliably and manage memory usage effectively.
+
+OK. Supergreat! Now. How do we save those embeddings to an directory?
+To save the generated embeddings to a directory, you can modify the save_embeddings function to include a directory path where the embeddings will be saved. Here's how you can do it:
+
+Prompt the User for the Output Directory:
+
+Ask the user to specify the directory where the embeddings should be saved.
+
+Save Embeddings to the Specified Directory:
+
+Ensure the directory exists and save the embeddings as .npy files in the specified directory.
+
+Here's the updated code with these changes:
+
+python
+Copy
+import os
+import json
+from sentence_transformers import SentenceTransformer
+import torch
+import numpy as np
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Step 1: Choose a pre-trained model
+model_name = "all-MiniLM-L6-v2"
+
+# Step 2: Load the pre-trained SentenceTransformer model
+# Utilize GPUs by setting device="cuda"
+model = SentenceTransformer(model_name, device="cuda")
+
+# Step 3: Check the number of GPUs available
+logging.info(f"Number of GPUs available: {torch.cuda.device_count()}")
+
+# Step 4: Prompt the user for the input directory
+input_directory = input("Enter the directory containing text or JSON files: ")
+
+# Step 5: Prompt the user for the output directory
+output_directory = input("Enter the directory to save the embeddings: ")
+
+# Ensure the output directory exists
+os.makedirs(output_directory, exist_ok=True)
+
+# Step 6: Recursively process files in the input directory
+def process_directory(directory):
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                if file.endswith(".txt"):
+                    logging.info(f"Processing text file: {file_path}")
+                    process_text_file(file_path)
+                elif file.endswith(".json"):
+                    logging.info(f"Processing JSON file: {file_path}")
+                    process_json_file(file_path)
+            except Exception as e:
+                logging.error(f"Error processing file {file_path}: {e}")
+
+def process_text_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            text_content = file.read()
+            sentences = text_content.split('\n')
+            generate_embeddings(sentences, file_path)
+    except Exception as e:
+        logging.error(f"Error reading text file {file_path}: {e}")
+
+def process_json_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            json_content = json.load(file)
+            # Assuming the JSON structure is a list of sentences or a dictionary with a 'text' key
+            if isinstance(json_content, list):
+                sentences = json_content
+            elif isinstance(json_content, dict) and 'text' in json_content:
+                sentences = json_content['text'].split('\n')
+            else:
+                logging.warning(f"Skipping JSON file {file_path} due to unsupported format.")
+                return
+            generate_embeddings(sentences, file_path)
+    except Exception as e:
+        logging.error(f"Error reading JSON file {file_path}: {e}")
+
+def generate_embeddings(sentences, file_path):
+    if sentences:
+        try:
+            embeddings = model.encode(sentences, batch_size=32, show_progress_bar=True)
+            logging.info(f"Embeddings shape: {embeddings.shape}")
+            save_embeddings(embeddings, file_path)
+        except Exception as e:
+            logging.error(f"Error generating embeddings for file {file_path}: {e}")
+
+def save_embeddings(embeddings, file_path):
+    try:
+        # Create the output file path
+        output_file_path = os.path.join(output_directory, os.path.basename(file_path) + '.npy')
+        np.save(output_file_path, embeddings)
+        logging.info(f"Embeddings saved to {output_file_path}")
+    except Exception as e:
+        logging.error(f"Error saving embeddings for file {file_path}: {e}")
+
+# Step 7: Start processing the input directory
+process_directory(input_directory)
+Key Changes:
+Prompt for Output Directory:
+
+Added a prompt to ask the user for the directory where the embeddings should be saved.
+
+Ensure Output Directory Exists:
+
+Used os.makedirs(output_directory, exist_ok=True) to ensure the output directory exists.
+
+Save Embeddings to Output Directory:
+
+Modified the save_embeddings function to save the embeddings to the specified output directory.
+
+The output file path is constructed by appending .npy to the base name of the input file.
+
+Summary:
+Input Directory: The user specifies the directory containing text or JSON files.
+
+Output Directory: The user specifies the directory where the embeddings will be saved.
+
+Save Embeddings: Embeddings are saved as .npy files in the specified output directory.
+
+By making these changes, you ensure that the generated embeddings are saved to a specified directory, making it easier to manage and use them later.
+
+That works well. What is cosine simularity and should we include it in our output as well?
+Cosine Similarity
+Cosine Similarity is a metric used to measure how similar two vectors are, regardless of their magnitude. It is particularly useful in natural language processing (NLP) for comparing sentence embeddings. The cosine similarity of two vectors 
+A
+A and 
+B
+B is calculated as:
+
+Cosine Similarity
+(
+A
+,
+B
+)
+=
+A
+⋅
+B
+∥
+A
+∥
+∥
+B
+∥
+Cosine Similarity(A,B)= 
+∥A∥∥B∥
+A⋅B
+​
+ 
+
+A
+⋅
+B
+A⋅B is the dot product of vectors 
+A
+A and 
+B
+B.
+
+∥
+A
+∥
+∥A∥ and 
+∥
+B
+∥
+∥B∥ are the magnitudes (or Euclidean norms) of vectors 
+A
+A and 
+B
+B, respectively.
+
+The cosine similarity ranges from -1 to 1:
+
+1 indicates that the vectors are identical.
+
+0 indicates that the vectors are orthogonal (i.e., no similarity).
+
+-1 indicates that the vectors are diametrically opposed.
+
+Why Include Cosine Similarity in the Output?
+Including cosine similarity in your output can be beneficial for several reasons:
+
+Semantic Similarity:
+
+Cosine similarity can help you understand the semantic similarity between different sentences or documents.
+
+It allows you to quantify how similar the embeddings are, which can be useful for tasks like clustering, ranking, or information retrieval.
+
+Evaluation:
+
+If you are evaluating the quality of your embeddings, cosine similarity can provide a quantitative measure of how well the embeddings capture the semantic meaning of the sentences.
+
+Visualization:
+
+Cosine similarity can be used to visualize the relationships between different sentences or documents in a 2D or 3D space.
+
+Implementing Cosine Similarity in the Code
+To include cosine similarity in your output, you can calculate the cosine similarity between the embeddings of different sentences and save this information along with the embeddings.
+
+Here's how you can modify the code to include cosine similarity:
+
+python
+Copy
+import os
+import json
+from sentence_transformers import SentenceTransformer
+import torch
+import numpy as np
+import logging
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Step 1: Choose a pre-trained model
+model_name = "all-MiniLM-L6-v2"
+
+# Step 2: Load the pre-trained SentenceTransformer model
+# Utilize GPUs by setting device="cuda"
+model = SentenceTransformer(model_name, device="cuda")
+
+# Step 3: Check the number of GPUs available
+logging.info(f"Number of GPUs available: {torch.cuda.device_count()}")
+
+# Step 4: Prompt the user for the input directory
+input_directory = input("Enter the directory containing text or JSON files: ")
+
+# Step 5: Prompt the user for the output directory
+output_directory = input("Enter the directory to save the embeddings and cosine similarities: ")
+
+# Ensure the output directory exists
+os.makedirs(output_directory, exist_ok=True)
+
+# Step 6: Recursively process files in the input directory
+def process_directory(directory):
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            try:
+                if file.endswith(".txt"):
+                    logging.info(f"Processing text file: {file_path}")
+                    process_text_file(file_path)
+                elif file.endswith(".json"):
+                    logging.info(f"Processing JSON file: {file_path}")
+                    process_json_file(file_path)
+            except Exception as e:
+                logging.error(f"Error processing file {file_path}: {e}")
+
+def process_text_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            text_content = file.read()
+            sentences = text_content.split('\n')
+            generate_embeddings(sentences, file_path)
+    except Exception as e:
+        logging.error(f"Error reading text file {file_path}: {e}")
+
+def process_json_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            json_content = json.load(file)
+            # Assuming the JSON structure is a list of sentences or a dictionary with a 'text' key
+            if isinstance(json_content, list):
+                sentences = json_content
+            elif isinstance(json_content, dict) and 'text' in json_content:
+                sentences = json_content['text'].split('\n')
+            else:
+                logging.warning(f"Skipping JSON file {file_path} due to unsupported format.")
+                return
+            generate_embeddings(sentences, file_path)
+    except Exception as e:
+        logging.error(f"Error reading JSON file {file_path}: {e}")
+
+def generate_embeddings(sentences, file_path):
+    if sentences:
+        try:
+            embeddings = model.encode(sentences, batch_size=32, show_progress_bar=True)
+            logging.info(f"Embeddings shape: {embeddings.shape}")
+            save_embeddings(embeddings, file_path)
+            calculate_and_save_cosine_similarity(embeddings, file_path)
+        except Exception as e:
+            logging.error(f"Error generating embeddings for file {file_path}: {e}")
+
+def save_embeddings(embeddings, file_path):
+    try:
+        # Create the output file path for embeddings
+        output_file_path = os.path.join(output_directory, os.path.basename(file_path) + '_embeddings.npy')
+        np.save(output_file_path, embeddings)
+        logging.info(f"Embeddings saved to {output_file_path}")
+    except Exception as e:
+        logging.error(f"Error saving embeddings for file {file_path}: {e}")
+
+def calculate_and_save_cosine_similarity(embeddings, file_path):
+    try:
+        # Calculate cosine similarity matrix
+        cosine_sim_matrix = cosine_similarity(embeddings)
+        
+        # Create the output file path for cosine similarity
+        output_file_path = os.path.join(output_directory, os.path.basename(file_path) + '_cosine_similarity.npy')
+        np.save(output_file_path, cosine_sim_matrix)
+        logging.info(f"Cosine similarity matrix saved to {output_file_path}")
+    except Exception as e:
+        logging.error(f"Error calculating or saving cosine similarity for file {file_path}: {e}")
+
+# Step 7: Start processing the input directory
+process_directory(input_directory)
+Key Changes:
+Cosine Similarity Calculation:
+
+Added a function calculate_and_save_cosine_similarity to calculate the cosine similarity matrix for the embeddings.
+
+The cosine similarity matrix is saved as a .npy file in the specified output directory.
+
+Output File Paths:
+
+Modified the output file paths to include _embeddings.npy and _cosine_similarity.npy to distinguish between the embeddings and cosine similarity matrices.
+
+Summary:
+Cosine Similarity: The cosine similarity matrix is calculated and saved along with the embeddings.
+
+Output Directory: The embeddings and cosine similarity matrices are saved in the specified output directory.
+
+Logging: Improved logging to track the progress and any errors encountered.
+
+By including cosine similarity in your output, you can gain insights into the semantic relationships between different sentences or documents, making your embeddings more versatile and useful for various NLP tasks.
+
+And could we also add stop/resume and graceful shutdown to that script?
+Certainly! Adding stop/resume functionality and graceful shutdown to the script can make it more robust and user-friendly. Here's how you can implement these features:
+
+Stop/Resume Functionality
+To implement stop/resume functionality, you can save the state of the processing (e.g., the list of files that have been processed) to a checkpoint file. When the script is resumed, it can load the checkpoint file and continue processing from where it left off.
+
+Graceful Shutdown
+For graceful shutdown, you can catch signals like SIGINT (Ctrl+C) and SIGTERM to save the current state before exiting.
+
+Updated Code with Stop/Resume and Graceful Shutdown
+Here's the updated code with these features:
+
+python
+Copy
+import os
+import json
+from sentence_transformers import SentenceTransformer
+import torch
+import numpy as np
+import logging
+from sklearn.metrics.pairwise import cosine_similarity
+import signal
+import pickle
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Step 1: Choose a pre-trained model
+model_name = "all-MiniLM-L6-v2"
+
+# Step 2: Load the pre-trained SentenceTransformer model
+# Utilize GPUs by setting device="cuda"
+model = SentenceTransformer(model_name, device="cuda")
+
+# Step 3: Check the number of GPUs available
+logging.info(f"Number of GPUs available: {torch.cuda.device_count()}")
+
+# Step 4: Prompt the user for the input directory
+input_directory = input("Enter the directory containing text or JSON files: ")
+
+# Step 5: Prompt the user for the output directory
+output_directory = input("Enter the directory to save the embeddings and cosine similarities: ")
+
+# Ensure the output directory exists
+os.makedirs(output_directory, exist_ok=True)
+
+# Step 6: Define checkpoint file path
+checkpoint_file = os.path.join(output_directory, 'checkpoint.pkl')
+
+# Step 7: Load checkpoint if it exists
+processed_files = set()
+if os.path.exists(checkpoint_file):
+    with open(checkpoint_file, 'rb') as f:
+        processed_files = pickle.load(f)
+
+# Step 8: Define signal handler for graceful shutdown
+def signal_handler(sig, frame):
+    logging.info("Graceful shutdown initiated. Saving checkpoint...")
+    with open(checkpoint_file, 'wb') as f:
+        pickle.dump(processed_files, f)
+    logging.info("Checkpoint saved. Exiting...")
+    exit(0)
+
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
+# Step 9: Recursively process files in the input directory
+def process_directory(directory):
+    for root, _, files in os.walk(directory):
+        for file in files:
+            file_path = os.path.join(root, file)
+            if file_path in processed_files:
+                logging.info(f"Skipping already processed file: {file_path}")
+                continue
+            try:
+                if file.endswith(".txt"):
+                    logging.info(f"Processing text file: {file_path}")
+                    process_text_file(file_path)
+                elif file.endswith(".json"):
+                    logging.info(f"Processing JSON file: {file_path}")
+                    process_json_file(file_path)
+                processed_files.add(file_path)
+            except Exception as e:
+                logging.error(f"Error processing file {file_path}: {e}")
+
+def process_text_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            text_content = file.read()
+            sentences = text_content.split('\n')
+            generate_embeddings(sentences, file_path)
+    except Exception as e:
+        logging.error(f"Error reading text file {file_path}: {e}")
+
+def process_json_file(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            json_content = json.load(file)
+            # Assuming the JSON structure is a list of sentences or a dictionary with a 'text' key
+            if isinstance(json_content, list):
+                sentences = json_content
+            elif isinstance(json_content, dict) and 'text' in json_content:
+                sentences = json_content['text'].split('\n')
+            else:
+                logging.warning(f"Skipping JSON file {file_path} due to unsupported format.")
+                return
+            generate_embeddings(sentences, file_path)
+    except Exception as e:
+        logging.error(f"Error reading JSON file {file_path}: {e}")
+
+def generate_embeddings(sentences, file_path):
+    if sentences:
+        try:
+            embeddings = model.encode(sentences, batch_size=32, show_progress_bar=True)
+            logging.info(f"Embeddings shape: {embeddings.shape}")
+            save_embeddings(embeddings, file_path)
+            calculate_and_save_cosine_similarity(embeddings, file_path)
+        except Exception as e:
+            logging.error(f"Error generating embeddings for file {file_path}: {e}")
+
+def save_embeddings(embeddings, file_path):
+    try:
+        # Create the output file path for embeddings
+        output_file_path = os.path.join(output_directory, os.path.basename(file_path) + '_embeddings.npy')
+        np.save(output_file_path, embeddings)
+        logging.info(f"Embeddings saved to {output_file_path}")
+    except Exception as e:
+        logging.error(f"Error saving embeddings for file {file_path}: {e}")
+
+def calculate_and_save_cosine_similarity(embeddings, file_path):
+    try:
+        # Calculate cosine similarity matrix
+        cosine_sim_matrix = cosine_similarity(embeddings)
+        
+        # Create the output file path for cosine similarity
+        output_file_path = os.path.join(output_directory, os.path.basename(file_path) + '_cosine_similarity.npy')
+        np.save(output_file_path, cosine_sim_matrix)
+        logging.info(f"Cosine similarity matrix saved to {output_file_path}")
+    except Exception as e:
+        logging.error(f"Error calculating or saving cosine similarity for file {file_path}: {e}")
+
+# Step 10: Start processing the input directory
+process_directory(input_directory)
+
+# Step 11: Save checkpoint after processing all files
+with open(checkpoint_file, 'wb') as f:
+    pickle.dump(processed_files, f)
+logging.info("Processing completed. Checkpoint saved.")
+Key Changes:
+Checkpoint File:
+
+Added a checkpoint file (checkpoint.pkl) to save the list of processed files.
+
+Loaded the checkpoint file at the start to resume processing from where it left off.
+
+Signal Handler:
+
+Added a signal handler for SIGINT and SIGTERM to save the checkpoint and exit gracefully.
+
+Processed Files Set:
+
+Maintained a set of processed files to avoid reprocessing them.
+
+Summary:
+Stop/Resume: The script saves a checkpoint file to resume processing from where it left off.
+
+Graceful Shutdown: The script catches SIGINT and SIGTERM signals to save the checkpoint and exit gracefully.
+
+Output Directory: The embeddings and cosine similarity matrices are saved in the specified output directory.
+
+Logging: Improved logging to track the progress and any errors encountered.
+
+By including these features, you make the script more robust and user-friendly, allowing it to handle interruptions and resume processing seamlessly.
