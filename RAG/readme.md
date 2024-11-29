@@ -468,3 +468,272 @@ Use a hybrid approach to balance the advantages of both:
 ---
 
 Would you like help generating specific labels, an exclusion list, or automating this process?
+
+Here is a Python script for **zero-shot classification** using the `facebook/bart-large-mnli` model. The script will prompt the user for a directory containing text files, classify each file against a list of user-provided target labels, and output the results to the console.
+
+---
+
+### Script: Zero-Shot Classification with `facebook/bart-large-mnli`
+
+```python
+import os
+from transformers import pipeline
+
+def main():
+    # Prompt user for the directory path containing text files
+    target_dir = input("Enter the path to the directory containing text files: ").strip()
+    
+    # Verify the directory exists
+    if not os.path.isdir(target_dir):
+        print(f"Error: Directory '{target_dir}' does not exist.")
+        return
+
+    # Prompt user for target labels (comma-separated)
+    labels_input = input("Enter target labels (comma-separated, e.g., 'science, law, biology, technology'): ").strip()
+    labels = [label.strip() for label in labels_input.split(",")]
+
+    if not labels:
+        print("Error: No labels provided.")
+        return
+
+    # Load the zero-shot classification pipeline
+    print("Loading facebook/bart-large-mnli model...")
+    classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli")
+
+    print("\nProcessing text files...\n")
+    
+    # Process each text file in the directory
+    for file_name in os.listdir(target_dir):
+        file_path = os.path.join(target_dir, file_name)
+
+        # Only process text files
+        if os.path.isfile(file_path) and file_path.endswith(".txt"):
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read()
+
+            # Perform zero-shot classification
+            try:
+                result = classifier(text, candidate_labels=labels, multi_label=True)
+                
+                # Print results to the console
+                print(f"File: {file_name}")
+                print("Labels and scores:")
+                for label, score in zip(result["labels"], result["scores"]):
+                    print(f"  - {label}: {score:.4f}")
+                print("-" * 50)
+            except Exception as e:
+                print(f"Error processing file '{file_name}': {e}")
+        else:
+            print(f"Skipping non-text file: {file_name}")
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+### **Instructions**
+
+1. **Install Required Libraries**:
+   Ensure you have the Hugging Face Transformers library installed. Run:
+   ```bash
+   pip install transformers
+   ```
+
+2. **Prepare Your Environment**:
+   - Your system has CUDA 12.7, so ensure that **PyTorch** is installed with GPU support.
+   - Install PyTorch with CUDA support:
+     ```bash
+     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu127
+     ```
+
+3. **Run the Script**:
+   - Save the script as `zero_shot_classifier.py`.
+   - Run the script:
+     ```bash
+     python3 zero_shot_classifier.py
+     ```
+
+4. **Provide Input**:
+   - Enter the directory containing text files (e.g., `/path/to/text/files`).
+   - Provide the target labels, such as `science, law, biology, technology`.
+
+5. **View Output**:
+   - The script processes each `.txt` file in the directory.
+   - It outputs the classification results (labels and their probabilities) to the console.
+
+---
+
+### **Expected Console Output**
+Example output when processing a file:
+
+```plaintext
+Enter the path to the directory containing text files: /path/to/text/files
+Enter target labels (comma-separated, e.g., 'science, law, biology, technology'): science, law, biology, technology
+Loading facebook/bart-large-mnli model...
+
+Processing text files...
+
+File: example1.txt
+Labels and scores:
+  - science: 0.8943
+  - technology: 0.7321
+  - biology: 0.4512
+  - law: 0.1523
+--------------------------------------------------
+File: example2.txt
+Labels and scores:
+  - law: 0.8712
+  - science: 0.3204
+  - technology: 0.1021
+  - biology: 0.0723
+--------------------------------------------------
+```
+
+---
+
+### **GPU Utilization**
+
+- **Verify GPU Usage**:
+  After running the script, check GPU utilization with:
+  ```bash
+  nvidia-smi
+  ```
+  Look for activity under the process using `python3`.
+
+- The script will automatically utilize GPUs if PyTorch is installed with CUDA support and your drivers are configured correctly.
+
+If you encounter issues or need further customization (e.g., adding logging, saving results, or improving performance), let me know!
+
+You can modify the script to query the available GPU devices and prompt the user to select which GPU they wish to use. The `transformers` library supports specifying a `device` argument for the pipeline to leverage GPU acceleration.
+
+Here’s how you can enhance the script to allow the user to choose a GPU device:
+
+---
+
+### **Modified Script with GPU Selection**
+```python
+import os
+import torch
+from transformers import pipeline
+
+def list_available_devices():
+    """List available GPU devices and return the selected device."""
+    if not torch.cuda.is_available():
+        print("No GPU devices available. Running on CPU.")
+        return -1  # Use CPU
+    
+    print("Available GPU devices:")
+    for i in range(torch.cuda.device_count()):
+        print(f"  [{i}] {torch.cuda.get_device_name(i)}")
+    
+    while True:
+        device_id = input("Select a GPU device ID (or press Enter to use CPU): ").strip()
+        if device_id == "":
+            print("Using CPU.")
+            return -1
+        if device_id.isdigit() and int(device_id) < torch.cuda.device_count():
+            print(f"Using GPU device {device_id}: {torch.cuda.get_device_name(int(device_id))}")
+            return int(device_id)
+        else:
+            print("Invalid selection. Please enter a valid GPU device ID.")
+
+def main():
+    # Prompt user for the directory path containing text files
+    target_dir = input("Enter the path to the directory containing text files: ").strip()
+    
+    # Verify the directory exists
+    if not os.path.isdir(target_dir):
+        print(f"Error: Directory '{target_dir}' does not exist.")
+        return
+
+    # Prompt user for target labels (comma-separated)
+    labels_input = input("Enter target labels (comma-separated, e.g., 'science, law, biology, technology'): ").strip()
+    labels = [label.strip() for label in labels_input.split(",")]
+
+    if not labels:
+        print("Error: No labels provided.")
+        return
+
+    # Select device (CPU or GPU)
+    device = list_available_devices()
+
+    # Load the zero-shot classification pipeline
+    print("Loading facebook/bart-large-mnli model...")
+    classifier = pipeline("zero-shot-classification", model="facebook/bart-large-mnli", device=device)
+
+    print("\nProcessing text files...\n")
+    
+    # Process each text file in the directory
+    for file_name in os.listdir(target_dir):
+        file_path = os.path.join(target_dir, file_name)
+
+        # Only process text files
+        if os.path.isfile(file_path) and file_path.endswith(".txt"):
+            with open(file_path, "r", encoding="utf-8") as f:
+                text = f.read()
+
+            # Perform zero-shot classification
+            try:
+                result = classifier(text, candidate_labels=labels, multi_label=True)
+                
+                # Print results to the console
+                print(f"File: {file_name}")
+                print("Labels and scores:")
+                for label, score in zip(result["labels"], result["scores"]):
+                    print(f"  - {label}: {score:.4f}")
+                print("-" * 50)
+            except Exception as e:
+                print(f"Error processing file '{file_name}': {e}")
+        else:
+            print(f"Skipping non-text file: {file_name}")
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+### **Explanation of Changes**
+
+1. **Check for Available GPUs**:
+   The function `list_available_devices()` checks for available GPUs using `torch.cuda`.
+
+2. **User Prompt for Device Selection**:
+   - Lists all available GPU devices and their names.
+   - Allows the user to select a GPU by entering its device ID.
+   - Defaults to CPU if the user presses Enter or selects an invalid option.
+
+3. **Set the Pipeline `device`**:
+   - The `device` parameter in the `pipeline` function specifies whether to run on CPU (`-1`) or a specific GPU (`0`, `1`, etc.).
+
+4. **Fallback to CPU**:
+   - If no GPUs are available or the user chooses not to use one, the script will run on the CPU.
+
+---
+
+### **Execution Example**
+- If GPUs are available:
+  ```plaintext
+  Available GPU devices:
+    [0] NVIDIA GeForce RTX 3080
+    [1] NVIDIA GeForce RTX 3060
+  Select a GPU device ID (or press Enter to use CPU): 1
+  Using GPU device 1: NVIDIA GeForce RTX 3060
+  ```
+- If the user presses Enter:
+  ```plaintext
+  Using CPU.
+  ```
+
+---
+
+### **Verify GPU Utilization**
+- Check GPU utilization during execution:
+  ```bash
+  nvidia-smi
+  ```
+
+This will confirm that the pipeline is utilizing the selected GPU.
+
+Let me know if you need further customizations!
