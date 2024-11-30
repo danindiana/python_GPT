@@ -1057,3 +1057,336 @@ if __name__ == "__main__":
 - **Extensibility**: Dash apps can be scaled to include advanced filters, additional charts, and even integrated machine learning models.
 
 Let me know if you'd like help adding more advanced features! 😊
+
+Certainly! Below is the modified code with robust directory permission handling, graceful shutdown/suspend-resume functionality, and other desirable features included:
+
+```python
+import os
+import pdfplumber
+import pytesseract
+from PIL import Image
+from transformers import pipeline
+import pandas as pd
+import plotly.express as px
+from dash import Dash, dcc, html, Input, Output, State
+import dash_bootstrap_components as dbc
+import signal
+import sys
+import json
+
+# Define constants
+PDF_DIRECTORY = "./pdf_files"  # Directory containing PDF files
+OUTPUT_FILE = "pdf_classification_results.csv"  # Output CSV file
+STATE_FILE = "processing_state.json"  # File to store processing state
+BERT_MODEL = "bert-base-uncased"  # Pre-trained BERT model
+CLASSIFIER = "facebook/bart-large-mnli"  # Zero-shot classifier
+
+# Initialize zero-shot classification pipeline
+classifier = pipeline("zero-shot-classification", model=CLASSIFIER)
+
+# Labels for classification
+labels = ["science", "technology", "law", "medicine", "literature"]
+
+# Global variables to keep track of state
+processed_files = set()
+
+def check_directory_permissions(directory):
+    """Check if the directory exists and has write permissions."""
+    if not os.path.exists(directory):
+        print(f"Error: Directory '{directory}' does not exist.")
+        return False
+    if not os.access(directory, os.W_OK):
+        print(f"Error: You do not have write permissions for the directory '{directory}'.")
+        return False
+    return True
+
+def extract_text_from_pdf(pdf_path):
+    """Extract text from a PDF file."""
+    text = ""
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            # Try to extract text directly
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
+            else:
+                # If no text is found, use OCR to extract text from images
+                image = page.to_image()
+                text += pytesseract.image_to_string(image) + "\n"
+    return text.strip()
+
+def chunk_text(text, chunk_size=512):
+    """Split text into chunks of a specified size."""
+    words = text.split()
+    chunks = []
+    current_chunk = []
+
+    for word in words:
+        current_chunk.append(word)
+        if len(" ".join(current_chunk)) >= chunk_size:
+            chunks.append(" ".join(current_chunk))
+            current_chunk = []
+
+    if current_chunk:
+        chunks.append(" ".join(current_chunk))
+
+    return chunks
+
+def classify_pdf_text(file_name, text, labels):
+    """Classify the extracted text from a PDF."""
+    try:
+        chunks = chunk_text(text)
+        results = []
+        for chunk in chunks:
+            result = classifier(chunk, candidate_labels=labels, multi_label=True)
+            results.append(result)
+
+        # Aggregate results
+        aggregated_labels = set()
+        aggregated_scores = {}
+        for result in results:
+            for label, score in zip(result["labels"], result["scores"]):
+                aggregated_labels.add(label)
+                if label in aggregated_scores:
+                    aggregated_scores[label] = max(aggregated_scores[label], score)
+                else:
+                    aggregated_scores[label] = score
+
+        return {
+            "File Name": file_name,
+            "Labels": list(aggregated_labels),
+            "Scores": [aggregated_scores[label] for label in aggregated_labels]
+        }
+    except Exception as e:
+        print(f"Error processing file {file_name}: {e}")
+        return None
+
+def save_state(processed_files):
+    """Save the state of processed files to a JSON file."""
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(list(processed_files), f, indent=4)
+
+def load_state():
+    """Load the state of processed files from a JSON file."""
+    global processed_files
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE, "r", encoding="utf-8") as f:
+            processed_files = set(json.load(f))
+
+def signal_handler(sig, frame):
+    """Handle interrupt signals and save state before exiting."""
+    print("\nInterrupt received, saving state and exiting...")
+    save_state(processed_files)
+    sys.exit(0)
+
+def main():
+    if not check_directory_permissions(PDF_DIRECTORY):
+        return
+
+    # Register signal handler for graceful shutdown
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    # Load existing state
+    load_state()
+
+    results = []
+
+    # Process each PDF in the directory
+    for file_name in os.listdir(PDF_DIRECTORY):
+        file_path = os.path.join(PDF_DIRECTORY, file_name)
+
+        if file_name.endswith(".pdf") and os.path.isfile(file_path) and file_name not in processed_files:
+            print(f"Processing: {file_name}")
+
+            # Extract text from the PDF
+            text = extract_text_from_pdf(file_path)
+            if not text:
+                print(f"Could not extract text from {file_name}. Skipping.")
+                continue
+
+            # Classify the extracted text
+            classification_result = classify_pdf_text(file_name, text, labels)
+            if classification_result:
+                results.append(classification_result)
+
+            # Mark file as processed
+            processed_files.add(file_name)
+
+            # Save state incrementally
+            save_state(processed_files)
+
+    # Save results to a CSV file
+    if results:
+        with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
+            f.write("File Name,Label,Score\n")
+            for result in results:
+                for label, score in zip(result["Labels"], result["Scores"]):
+                    f.write(f"{result['File Name']},{label},{score:.4f}\n")
+
+        print(f"Results saved to {OUTPUT_FILE}.")
+    else:
+        print("No new results to save.")
+
+    # Save final state
+    save_state(processed_files)
+
+if __name__ == "__main__":
+    main()
+
+# Initialize Dash app for visualization
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+# Layout for the app
+app.layout = html.Div([
+    html.H1("PDF Document Scores Visualization", style={"textAlign": "center"}),
+
+    # Slider for classification score threshold
+    html.Div([
+        html.Label("Minimum Classification Score:"),
+        dcc.Slider(
+            id="min-score-slider",
+            min=0,
+            max=1,
+            step=0.01,
+            value=0.5,  # Default threshold
+            marks={i / 10: str(i / 10) for i in range(11)}
+        )
+    ], style={"padding": "20px"}),
+
+    # Checkboxes for label inclusion/exclusion
+    html.Div([
+        html.Label("Include Labels:"),
+        dcc.Checklist(
+            id="include-labels",
+            options=[{"label": label, "value": label} for label in labels],
+            value=[],
+            inline=True
+        )
+    ], style={"padding": "20px"}),
+
+    html.Div([
+        html.Label("Exclude Labels:"),
+        dcc.Checklist(
+            id="exclude-labels",
+            options=[{"label": label, "value": label} for label in labels],
+            value=[],
+            inline=True
+        )
+    ], style={"padding": "20px"}),
+
+    # Button to export filtered results
+    html.Div([
+        dbc.Button("Export Filtered Results", id="export-button", color="primary", className="me-1")
+    ], style={"padding": "20px"}),
+
+    # Graph
+    dcc.Graph(id="document-chart"),
+
+    # Hidden div to store filtered data for export
+    dcc.Store(id="filtered-data")
+])
+
+# Callback to update chart based on thresholds and labels
+@app.callback(
+    [Output("document-chart", "figure"), Output("filtered-data", "data")],
+    [Input("min-score-slider", "value"),
+     Input("include-labels", "value"),
+     Input("exclude-labels", "value")]
+)
+def update_chart(min_score, include_labels, exclude_labels):
+    # Load CSV data
+    data = pd.read_csv(OUTPUT_FILE)
+
+    # Filter data based on thresholds and labels
+    filtered_data = data[
+        (data["Score"] >= min_score)
+    ]
+    if include_labels:
+        filtered_data = filtered_data[filtered_data["Label"].isin(include_labels)]
+    if exclude_labels:
+        filtered_data = filtered_data[~filtered_data["Label"].isin(exclude_labels)]
+
+    # Create bar chart
+    fig = px.bar(
+        filtered_data,
+        x="File Name",
+        y="Score",
+        color="Label",
+        hover_data=["Score"],
+        title="Filtered Document Scores"
+    )
+    fig.update_layout(
+        xaxis_title="Document Name",
+        yaxis_title="Classification Score",
+        template="plotly_white"
+    )
+
+    # Store filtered data for export
+    filtered_data_json = filtered_data.to_json(date_format='iso', orient='split')
+
+    return fig, filtered_data_json
+
+# Callback to export filtered results
+@app.callback(
+    Output("export-button", "n_clicks"),
+    [Input("export-button", "n_clicks")],
+    [State("filtered-data", "data")]
+)
+def export_filtered_results(n_clicks, filtered_data_json):
+    if n_clicks:
+        filtered_data = pd.read_json(filtered_data_json, orient='split')
+        filtered_data.to_csv("filtered_pdf_documents.csv", index=False)
+        print("Filtered results exported to filtered_pdf_documents.csv")
+    return 0
+
+# Run the app
+if __name__ == "__main__":
+    app.run_server(debug=True)
+```
+
+### Key Changes and Features:
+
+1. **Directory Permission Handling**:
+   - Added a `check_directory_permissions` function to verify if the directory exists and has write permissions. This function is called at the beginning of the `main` function to ensure the script can proceed only if the directory permissions are correct.
+
+2. **Graceful Shutdown/Suspend-Resume Functionality**:
+   - Added signal handlers for `SIGINT` (Ctrl+C) and `SIGTERM` to save the state before exiting.
+   - Added functions `save_state` and `load_state` to save and load the state of processed files.
+   - The script now saves the state incrementally after processing each file and saves the final state at the end.
+
+3. **Robust Error Handling**:
+   - The script now checks if the directory exists and has write permissions before proceeding with the PDF processing.
+
+4. **Dash App for Visualization**:
+   - The Dash app remains unchanged, providing a user-friendly interface to visualize and filter the classification results.
+
+5. **Export Filtered Results**:
+   - The Dash app includes a button to export the filtered results to a CSV file.
+
+### Steps to Run the Script:
+
+1. **Ensure the Directory Exists**:
+   - Verify that the directory `./pdf_files` exists and contains the PDF files you want to process.
+
+2. **Set Permissions**:
+   - Ensure you have write permissions for the directory. You can check this with:
+
+   ```sh
+   ls -ld ./pdf_files
+   ```
+
+   If you don't have write permissions, you can add them with:
+
+   ```sh
+   sudo chmod u+w ./pdf_files
+   ```
+
+3. **Run the Script**:
+   - Execute the script using Python:
+
+   ```sh
+   python your_script_name.py
+   ```
+
+This should resolve the permission issue and allow the script to run correctly with graceful shutdown/suspend-resume functionality.
