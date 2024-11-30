@@ -137,3 +137,107 @@ Thanks for understanding! Let me know if you have any questions.
 
 Best,
 [Your Name]
+
+Subject: Explaining My Software Project This Evening
+
+Hi Mom,
+
+I hope you're doing well! I wanted to give you a quick update on what I'm working on this evening.
+
+I'm currently working on a software project that helps manage and clean up duplicate files on a computer. Sometimes, when we download or create a lot of files, we end up with multiple copies of the same file, which can take up unnecessary space on the computer's hard drive. My program is designed to identify these duplicate files and help me delete the extra copies, keeping only one of each.
+
+Here's a brief overview of what I'm doing:
+
+1. **Reading a Text File**: The program reads a text file that contains information about the duplicate files. This file lists the paths and unique identifiers (called MD5 hashes) for each file.
+
+2. **Identifying Duplicates**: The program processes this information to identify which files are duplicates based on their MD5 hashes.
+
+3. **Deleting Duplicates**: Once the duplicates are identified, the program asks for my confirmation to delete the extra copies. It keeps the file with the longest name or the oldest modification date in case of a tie.
+
+4. **Tracking Progress**: I've also added a feature to count and display the total number of files processed during the run.
+
+5. **Version Control**: I'm using a tool called Git to keep track of changes in my code. This helps me manage the project and collaborate with others if needed.
+
+This project is a bit technical, but it's a good exercise in problem-solving and software development. I'm excited to see it come together and help keep our files organized!
+
+Thanks for your support, Mom. I'll let you know how it goes.
+
+Take care!
+
+Best,
+[Your Name]
+
+Dear Mom,
+
+I hope this letter finds you well. I wanted to take a moment to explain what I'm working on in software this evening. It's a project that involves processing PDF files to extract text and images, and then saving the extracted information in different formats like text files, CSV files, and JSON files.
+
+Here's a bit more detail on what I'm doing:
+
+1. **Input and Output Directories**: First, I ask the user (which is me for now) to specify the directory where the PDF files are stored and the directory where the processed files will be saved.
+
+2. **Output Format Selection**: I then ask the user to choose the format in which they want the output files to be saved. The options are text files (txt), CSV files (csv), and JSON files (json).
+
+3. **Processing PDFs**: For each PDF file in the input directory, I use a tool called Tesseract OCR to extract text and images. OCR stands for Optical Character Recognition, which is a technology that recognizes text within images.
+
+4. **Saving Output**: Depending on the chosen output format:
+   - **Text Files (txt)**: I combine all the extracted text into a single text file.
+   - **CSV Files (csv)**: I save the extracted text into a CSV file, which is a format that can be easily opened in spreadsheet programs like Excel.
+   - **JSON Files (json)**: I save the extracted text into a JSON file, which is a format often used for data exchange between different systems.
+
+5. **Error Handling**: If something goes wrong while processing a PDF file, I log the error so I can review it later and continue processing the next file.
+
+6. **Final Cleanup**: After processing all the files, I make sure to release any resources that were used, such as closing any open files and clearing up memory.
+
+This project is a bit complex, but it's helping me learn more about how to work with files, handle different data formats, and manage resources efficiently. I'm also getting more comfortable with programming in Python, which is the language I'm using for this project.
+
+I hope this gives you a good idea of what I'm working on. It's a bit technical, but I'm enjoying the challenge and learning a lot in the process.
+
+Take care, and I'll talk to you soon!
+
+Love,
+[Your Name]
+
+Dear Mom,
+
+I hope this letter finds you well. I wanted to take a moment to explain what I'm working on in software this evening. It's a bit technical, but I'll try to keep it simple and clear.
+
+### What I'm Trying to Do
+
+I'm working on a project that involves processing a lot of text data. Specifically, I'm trying to convert sentences from text files into a special kind of numerical representation called "embeddings." These embeddings are like digital fingerprints for words and sentences, which can help the computer understand and compare them more effectively.
+
+### Why It's Important
+
+This is important because it allows the computer to do things like:
+- Understand the meaning of sentences.
+- Find similar sentences in a large collection of text.
+- Answer questions based on the text.
+
+### The Process
+
+1. **Loading the Model**: First, I need to load a special model that can create these embeddings. This model is quite large, so it requires a lot of computer memory.
+2. **Processing the Text**: Next, I read sentences from text files and use the model to convert them into embeddings.
+3. **Saving the Results**: Finally, I save these embeddings so they can be used later for various tasks.
+
+### The Challenge
+
+The main challenge I'm facing tonight is that the model is so large, it doesn't fit into the memory of my computer's graphics card (GPU). This is causing the computer to run out of memory, which is a common issue when working with very large models.
+
+### What I'm Doing to Fix It
+
+To solve this problem, I'm trying a few different strategies:
+- **Reducing Batch Size**: I'm processing the sentences in smaller groups to reduce the amount of memory needed at once.
+- **Using Mixed Precision**: This involves using a more efficient way to store numbers in the computer's memory, which can save a lot of space.
+- **Clearing Memory**: I'm making sure to free up memory when it's not needed, so the computer has more space to work with.
+
+### Why It's Taking Time
+
+This process is taking some time because I need to carefully manage the computer's memory and ensure that everything runs smoothly. 
+
+### Conclusion
+
+I hope this gives you a better understanding of what I'm working on. It's a challenging but exciting project that could lead to some interesting advancements in how computers understand and process language.
+
+Thank you for your support and understanding. I'll keep you updated on my progress.
+
+Take care,
+[Your Name]
