@@ -1,5 +1,5 @@
 System Specs: 
-
+```
   OS: Debian 12 bookworm
     ,g$$P""       """Y$$.".      Kernel: x86_64 Linux 6.1.0-28-amd64
    ,$$P'              `$$$.      Uptime: 3h 42m
@@ -49,7 +49,7 @@ Fri Dec 13 18:25:30 2024
 +---------------------------------------------------------------------------------------+
 tested and confirmed working on $ date
 Fri Dec 13 06:25:51 PM CST 2024
-
+```
 
 This script is a tool designed to process text files by sending chunks of text to an API (Ollama) for processing, saving the results to an output directory. Here's how it works, step by step:
 
