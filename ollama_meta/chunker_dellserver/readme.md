@@ -1,3 +1,56 @@
+System Specs: 
+
+  OS: Debian 12 bookworm
+    ,g$$P""       """Y$$.".      Kernel: x86_64 Linux 6.1.0-28-amd64
+   ,$$P'              `$$$.      Uptime: 3h 42m
+  ',$$P       ,ggs.     `$$b:    Packages: 2660
+  `d$$'     ,$P"'   .    $$$     Shell: bash 5.2.15
+   $$P      d$'     ,    $$P     Disk: 1.7T / 4.1T (43%)
+   $$:      $$.   -    ,d$$'     CPU: Intel Xeon E5-1660 0 @ 12x 3.3GHz [70.0°C]
+   $$\;      Y$b._   _,d$P'      GPU: NVIDIA GeForce GTX 1050 Ti, NVIDIA GeForce GTX 1060 6GB
+   Y$$.    `.`"Y$$$$P"'          RAM: 3232MiB / 32047MiB
+   `$$b      "-.__              
+    `Y$$                        
+     `Y$$.                      
+       `$$b.                    
+         `Y$$b.                 
+            `"Y$b._             
+                `""""           
+                                
+spook@dellserver:~
+$ nvidia-smi 
+Fri Dec 13 18:25:30 2024       
++---------------------------------------------------------------------------------------+
+| NVIDIA-SMI 535.183.01             Driver Version: 535.183.01   CUDA Version: 12.2     |
+|-----------------------------------------+----------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |         Memory-Usage | GPU-Util  Compute M. |
+|                                         |                      |               MIG M. |
+|=========================================+======================+======================|
+|   0  NVIDIA GeForce GTX 1050 Ti     On  | 00000000:03:00.0 Off |                  N/A |
+| 57%   85C    P0              N/A /  75W |   2528MiB /  4096MiB |     93%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+|   1  NVIDIA GeForce GTX 1060 6GB    On  | 00000000:04:00.0 Off |                  N/A |
+| 33%   52C    P2              49W / 120W |   5226MiB /  6144MiB |    100%      Default |
+|                                         |                      |                  N/A |
++-----------------------------------------+----------------------+----------------------+
+                                                                                         
++---------------------------------------------------------------------------------------+
+| Processes:                                                                            |
+|  GPU   GI   CI        PID   Type   Process name                            GPU Memory |
+|        ID   ID                                                             Usage      |
+|=======================================================================================|
+|    0   N/A  N/A      2421      G   /usr/lib/xorg/Xorg                           30MiB |
+|    0   N/A  N/A      2767      G   xfwm4                                         1MiB |
+|    0   N/A  N/A    190709      C   ...unners/cuda_v12/ollama_llama_server     2492MiB |
+|    1   N/A  N/A      2421      G   /usr/lib/xorg/Xorg                            4MiB |
+|    1   N/A  N/A      7699      C   python                                     5218MiB |
++---------------------------------------------------------------------------------------+
+tested and confirmed working on $ date
+Fri Dec 13 06:25:51 PM CST 2024
+
+
 This script is a tool designed to process text files by sending chunks of text to an API (Ollama) for processing, saving the results to an output directory. Here's how it works, step by step:
 
 ---
