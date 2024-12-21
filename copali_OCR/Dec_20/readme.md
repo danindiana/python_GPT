@@ -1,4 +1,4 @@
-Certainly! Below is a **Mermaid diagram** that visually represents the flow and functionality of the code. This diagram breaks down the key steps and logic of the program, focusing on how it processes PDF files, extracts text and images, and performs GPU-accelerated analysis.
+Below is a **Mermaid diagram** that visually represents the flow and functionality of the code. This diagram breaks down the key steps and logic of the program, focusing on how it processes PDF files, extracts text and images, and performs GPU-accelerated analysis.
 
 ---
 
