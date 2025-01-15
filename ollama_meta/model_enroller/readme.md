@@ -150,3 +150,51 @@ ollama list || echo "Failed to list models. Check permissions or logs."
 
 echo "All .gguf files have been processed and enrolled."
 ```
+The script does **not** use additional disk space when copying the `.gguf` files, provided that the source and destination directories are on the **same filesystem**. Here's why:
+
+---
+
+### **1. Copy Behavior**
+- The script uses the `cp` command to copy `.gguf` files from their original location to the target directory (`/home/ollama/models`).
+- If the source and destination are on the **same filesystem**, the `cp` command creates a **new copy** of the file, which **doubles the disk space usage** for that file.
+- If the source and destination are on **different filesystems**, the file is physically copied, also using additional disk space.
+
+---
+
+### **2. Symbolic Link Alternative**
+- The script creates a **symbolic link** (`ln -s`) for the `~/.ollama/models` directory to point to `/home/ollama/models`. This does **not** use additional disk space because symbolic links are just pointers to the original location.
+
+---
+
+### **3. Disk Space Optimization**
+If you want to avoid using additional disk space, you can modify the script to **move** the files instead of copying them, or use **hard links**. Here's how:
+
+#### **Option 1: Move Files Instead of Copying**
+Replace the `cp` command with `mv`:
+```bash
+mv "$GGUF_FILE" "$MODEL_DIR/"
+```
+- This will **move** the file to the target directory, freeing up space in the original location.
+
+#### **Option 2: Use Hard Links**
+Replace the `cp` command with `ln`:
+```bash
+ln "$GGUF_FILE" "$MODEL_DIR/"
+```
+- This creates a **hard link**, which points to the same underlying data on disk. Both the original and the linked file will refer to the same data, so no additional disk space is used.
+- Note: Hard links only work if the source and destination are on the **same filesystem**.
+
+---
+
+### **4. When Does the Script Use More Disk Space?**
+The script uses more disk space **only if**:
+- The `.gguf` files are copied (not moved or hard-linked).
+- The source and destination are on the **same filesystem**.
+
+---
+
+### **Recommendation**
+If disk space is a concern:
+- Use **hard links** (if the files are on the same filesystem).
+- Or **move** the files instead of copying them.
+
