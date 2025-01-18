@@ -2,15 +2,9 @@ From the output of `ip a`, your server has multiple network interfaces with the 
 
 1. **`eth0`**:
    - IPv4: `192.168.1.192`
-   - IPv6: `2603:8080:1100:1157::1ca9` and others.
+   
 
-2. **`eth1`**:
-   - IPv4: `192.168.1.193`
-   - IPv6: `2603:8080:1100:1157::184f` and others.
 
-3. **`tailscale0`** (Tailscale VPN interface):
-   - IPv4: `100.94.85.98`
-   - IPv6: `fd7a:115c:a1e0::ac01:5562`.
 
 ---
 
@@ -27,13 +21,7 @@ http://192.168.1.192:8188
 
 ---
 
-### **If You're Using Tailscale**
-If you want to access the server over the internet using Tailscale, use the Tailscale IP address:
-```
-http://100.94.85.98:8188
-```
 
----
 
 ### **Steps to Verify Connectivity**
 1. **Ping the Server**:
@@ -75,7 +63,6 @@ If you still cannot access the UI:
 
 ### **Summary**
 - Use `http://192.168.1.192:8188` or `http://192.168.1.193:8188` to access ComfyUI from another device on your local network.
-- If using Tailscale, use `http://100.94.85.98:8188`.
 - Ensure the firewall allows traffic on port `8188` and that the server is running with `--listen`.
 
 Let me know if you encounter further issues!
