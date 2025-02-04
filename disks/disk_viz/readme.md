@@ -1,3 +1,6 @@
+![Screenshot_2025-02-04_15-03-30](https://github.com/user-attachments/assets/8ff604e2-74c7-4129-9fa8-a6c8d9a7f736)
+
+
 A self‐contained Python script that “drills down” into a directory tree and displays file and directory sizes as a scrolling, interactive, ASCII “bar‐chart” view in your terminal. (It’s inspired by tools like **ncdu** but written from scratch for illustration.) You can save this as, for example, **diskvis.py** and run it on Ubuntu 22.04 with Python 3.
 
 > **Note:** Scanning very large directories recursively can be slow. In a production tool you might want to add threading, caching, or call out to “du” for faster performance.
