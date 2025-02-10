@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Job Listings</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Job Listings</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <a href="{{ url_for('post_job') }}" class="btn btn-primary">Post a Job</a>
+        <hr>
+        {% for job in jobs %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title"><a href="{{ url_for('job_details', id=job.id) }}">{{ job.title }}</a></h5>
+                <p class="card-text">{{ job.company }}</p>
+                <p class="card-text">Posted: {{ job.posted_date.strftime('%Y-%m-%d') }}</p>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
