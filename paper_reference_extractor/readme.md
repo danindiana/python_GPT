@@ -104,3 +104,22 @@ graph TD
     M -- Yes --> N[Write JSON Output];
     N --> O[End];
 ```
+```
+```
+Note: The pdf_ref_extractor program, in its modified version that handles both text and JSON output, waits until it has finished processing all PDF files in the specified directory before writing the output to the default directory.
+
+Here's why:
+
+Data Collection:
+
+The process_directory function iterates through all PDF files and calls process_pdf for each one.
+The process_pdf function extracts the data from each PDF and stores it in the output_data dictionary.
+The output_data dictionary is populated throughout the whole process of reading all of the pdf files.
+Output Writing:
+
+After the process_directory function completes (i.e., after all PDFs have been processed), the program then checks the value of the running variable. If it is still true, then it proceeds to write the output file.
+The output file is written based on the output_format selected by the user. If the user selected "txt", then the data from the output_data dictionary is written to a text file. If they selected "json", then the output_data dictionary is written to a JSON file.
+Therefore, the writing of the file is the very last step, after all of the pdf files have been read and processed.
+
+This approach ensures that the output file contains the complete results of processing all the PDFs in the directory.
+```
