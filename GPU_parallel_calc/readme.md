@@ -131,3 +131,30 @@ Hardware limitation reduction: 1.15
 - It provides insights into how PCIe bandwidth affects data transfer and IO performance.
 
 This function can be extended or modified to include additional factors or more detailed calculations depending on the specific use case.
+
+Key Additions and Refinements
+Custom Thread Pool Configuration:
+
+Added a function custom_thread_pool_configuration() to configure I/O and CPU thread pools using environment variables.
+
+Serial Execution:
+
+Added a function serial_execution() to demonstrate serial execution by setting thread pool sizes to 1.
+
+Asynchronous I/O Operations:
+
+Added a function asynchronous_io_operations() to simulate asynchronous I/O operations using Python's concurrent.futures.
+
+Parallel Matrix Operations:
+
+Added a function parallel_matrix_operations() to simulate parallel matrix multiplication using NumPy.
+
+Custom Executor Implementation:
+
+Added a function custom_executor_implementation() to demonstrate a custom executor using Python's threading module.
+
+The refactored script now includes components for custom thread pool configuration, serial execution, asynchronous I/O, parallel matrix operations, and custom executor implementation.
+
+These additions make the script more comprehensive and aligned with the provided C++ examples.
+
+The script can be further extended to include more advanced features like memory allocation management or integration with libraries like RAFT.
