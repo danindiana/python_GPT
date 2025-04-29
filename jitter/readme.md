@@ -1,3 +1,5 @@
+![Screenshot_2025-04-29_12-39-46](https://github.com/user-attachments/assets/b8dbedb0-3ce6-42b1-8deb-c6617cda1263)
+
 This Python script monitors and logs NTP (Network Time Protocol) offset and system jitter values over time, displaying them in a real-time graph. Here's a breakdown of what it does:
 
 ### Key Features:
@@ -45,3 +47,4 @@ This Python script monitors and logs NTP (Network Time Protocol) offset and syst
 - Adjust `figsize` in `plt.subplots()` to change graph dimensions
 
 The visualization helps identify time synchronization stability issues, showing both the current offset and how much it's fluctuating (jitter).
+
