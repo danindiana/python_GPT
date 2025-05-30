@@ -47,3 +47,5 @@ This is a Python program that creates a simple GUI chat application for interact
 - Shows error messages in red text
 
 This creates a basic but functional AI chat interface similar to many chatbot applications, specifically tailored for the DeepSeek API.
+
+![image](https://github.com/user-attachments/assets/c7f731ed-f1d7-4467-9ca1-3c54879cd525)
