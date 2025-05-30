@@ -1,5 +1,3 @@
----
-
 ### **Repository Description: `deepseek-chat-gui`**  
 *A simple Flet-based GUI for chatting with DeepSeek’s AI API.*  
 
