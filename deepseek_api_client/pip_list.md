@@ -1,0 +1,23 @@
+Python 3.12.0
+
+Package            Version
+------------------ ---------
+anyio              4.9.0
+certifi            2025.4.26
+charset-normalizer 3.4.2
+dotenv             0.9.9
+flet               0.28.3
+flet-desktop       0.28.3
+h11                0.16.0
+httpcore           1.0.9
+httpx              0.28.1
+idna               3.10
+oauthlib           3.2.2
+pip                23.2.1
+python-dotenv      1.1.0
+repath             0.9.0
+requests           2.32.3
+six                1.17.0
+sniffio            1.3.1
+typing_extensions  4.13.2
+urllib3            2.4.0
