@@ -34,7 +34,7 @@ deepseek-chat-gui/
    ```
 
 #### **🛠️ Dependencies**  
-- Python 3.7+  
+- Python 3.12+  
 - `flet` (GUI framework)  
 - `requests` (HTTP calls)  
 - `python-dotenv` (API key management)  
