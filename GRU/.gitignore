@@ -1,0 +1,16 @@
+# Build artifacts
+*.o
+gru_example_c
+gru_example_cpp
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Debugging files
+*.dSYM/
+vgcore.*
+core
